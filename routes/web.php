@@ -30,7 +30,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware([AuthAdmin::class])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
 
-    Route::get('/admin/brands', [AdminController::class, 'brands'])->name('admin.brands');
+    Route::get('/admin/brands', [AdminController::class, 'brands'])->name('admin.brands.index');
 });
 
 require __DIR__.'/auth.php';
