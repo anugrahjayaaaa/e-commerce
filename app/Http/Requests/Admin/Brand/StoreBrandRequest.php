@@ -25,9 +25,10 @@ class StoreBrandRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            // 'unique' rule will throw an error if the slug exists
             'slug' => 'nullable|string|max:255|unique:brands,slug',
-            'image' => 'nullable|image|mimes:peg,png,jpg,gif,svg|max:2048',
-            'status' => 'nullable|boolean',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'status' => 'nullable', // Boolean input from forms often comes as string 'on'
         ];
     }
 }
