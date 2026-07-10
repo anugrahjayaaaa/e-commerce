@@ -10,17 +10,27 @@
             </a>
         </div>
         <div class="max-w-3xl mx-auto">
-            <form class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-6">
+            <form action={{ route('admin.brands.store') }} method="POST" enctype="multipart/form-data"
+                class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-6">
+                @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Brand Name *</label>
                         <input type="text" id="name" name="name" placeholder="e.g. Samsung"
+                            value="{{ old('name') }}"
                             class="w-full border px-4 py-2 rounded-lg outline-none focus:ring-1 focus:ring-primary">
+                        @error('name')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Brand Slug</label>
                         <input type="text" id="slug" name="slug" placeholder="samsung"
+                            value="{{ old('slug') }}"
                             class="w-full border px-4 py-2 rounded-lg bg-gray-50 outline-none">
+                        @error('slug')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
@@ -42,6 +52,10 @@
 
                             <input id="brand-image" name="image" type="file" class="hidden"
                                 accept="image/png, image/jpeg, image/jpg, image/webp" />
+
+                            @error('image')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
                         </label>
 
                         <button type="button" id="remove-logo-btn"
@@ -71,5 +85,8 @@
     </main>
 
     <!-- Main Content End -->
+
+    {{-- script custom for this page --}}
+    @include('admin.brands.partials.script')
 
 </x-admin-layout>
