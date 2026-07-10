@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Brand\StoreBrandRequest;
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class BrandController extends Controller
 {
@@ -28,9 +30,24 @@ class BrandController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreBrandRequest $request)
     {
-        //
+        $validatedData = $request->validated();
+
+        $brand = new Brand();
+        $brand->name = $validatedData->name;
+        $brand->slug = $validatedData->slug ? Str::slug($validatedData->slug) : Str::slug($validatedData->name);
+        $brand->status = $validatedData->has('status') ? 1 : 0;
+
+        if ($validatedData->hasFile('image')) {
+            $imageName = time() . "_" . uniqid() . "." . $validatedData->image->extension();
+            $validatedData->image->move(public_path('uploads/brands/' . $brand->slug), $imageName);
+            $brand->image = $imageName;
+        }
+
+        $brand->save();
+
+        return redirect()->route('admin.brands.index')->with('success', 'Brand added successfully!');
     }
 
     /**
