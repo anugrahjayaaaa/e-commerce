@@ -59,7 +59,7 @@
                                 <td class="px-6 py-4">
                                     <div
                                         class="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center border">
-                                        <img src="{{ asset('uploads/brands/') }}/{{ $brand->image }}"
+                                        <img src="{{ asset('uploads/brands/thumbnails') }}/{{ $brand->image }}"
                                             class="max-w-[30px] max-h-[30px] object-contain" alt="{{ $brand->name }}"
                                             onerror="this.src='https://placehold.co/40x40?text=B'">
                                     </div>
