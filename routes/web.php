@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
@@ -27,10 +28,11 @@ Route::middleware('auth')->group(function () {
 });
 
 // Admin
-Route::middleware([AuthAdmin::class])->group(function () {
-    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+Route::middleware([AuthAdmin::class])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('index');
 
-    Route::get('/admin/brands', [AdminController::class, 'brands'])->name('admin.brands.index');
+    // brands
+    Route::resource('brands', BrandController::class);
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
