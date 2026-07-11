@@ -37,6 +37,12 @@
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            @if (session('success'))
+                <div class="px-6 py-4 bg-green-100 text-green-700 text-sm rounded-tl-xl rounded-tr-xl">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left whitespace-nowrap">
                     <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
@@ -92,11 +98,11 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <button
+                                        <a href="{{ route('admin.brands.edit', $brand) }}"
                                             class="w-8 h-8 rounded-full hover:bg-gray-100 text-blue-500 transition flex items-center justify-center"
                                             title="Edit">
                                             <i class="fa-solid fa-pen-to-square"></i>
-                                        </button>
+                                        </a>
                                         <button
                                             class="w-8 h-8 rounded-full hover:bg-gray-100 text-red-500 transition flex items-center justify-center"
                                             onclick="deleteBrand(this, 'Samsung', 101)" title="Delete">
