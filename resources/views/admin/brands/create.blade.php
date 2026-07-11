@@ -69,7 +69,7 @@
 
                 <div class="flex items-center gap-2">
                     <input type="checkbox" id="status" name="status"
-                        class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary">
+                        class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" value="1" {{ old('status') ? 'checked' : '' }}>
                     <label for="status" class="text-sm text-gray-700">Set as Active Brand</label>
                 </div>
 
