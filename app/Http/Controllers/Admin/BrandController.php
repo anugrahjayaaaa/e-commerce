@@ -25,7 +25,20 @@ class BrandController extends Controller
      */
     public function index()
     {
-        $brands = Brand::orderBy('id', 'DESC')->paginate(10);
+        $query = Brand::query();
+
+        $search = request('search');
+        $status = request('status');
+
+        if ($search) {
+            $query->where('name', 'LIKE', "{$search}");
+        }
+
+        if (request()->filled('status')) {
+            $query->where('status', $status);
+        }
+
+        $brands = $query->orderBy('id', 'DESC')->paginate(10)->withQueryString();
         return view('admin.brands.index', compact('brands'));
     }
 

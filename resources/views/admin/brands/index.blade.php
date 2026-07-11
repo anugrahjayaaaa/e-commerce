@@ -15,25 +15,35 @@
         </div>
 
         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
-            <div class="flex flex-col md:flex-row gap-4 justify-between">
+            <form action="{{ route('admin.brands.index') }}" method="GET"
+                class="flex flex-col md:flex-row gap-4 justify-between">
                 <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                     <div class="relative w-full md:w-64">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                             <i class="fa-solid fa-search text-gray-400"></i>
                         </span>
-                        <input type="text"
+                        <input type="text" name="search" value="{{ request('search') }}"
                             class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                             placeholder="Search brand...">
                     </div>
 
-                    <select
+                    <select name="status"
                         class="w-full md:w-40 border px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-primary bg-white text-gray-600">
                         <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
+                        <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Active</option>
+                        <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Inactive</option>
                     </select>
+
+                    @if (request('search') || request()->filled('status'))
+                        <a href="{{ route('admin.brands.index') }}"
+                            class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors duration-200">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                            <span>Clear</span>
+                        </a>
+                    @endif
                 </div>
-            </div>
+                <button type="submit" class="hidden">Apply</button>
+            </form>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
