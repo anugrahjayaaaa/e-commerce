@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Brand\StoreBrandRequest;
+use App\Http\Requests\Admin\Brand\UpdateBrandRequest;
 use App\Models\Brand;
 use App\Services\ImageService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class BrandController extends Controller
@@ -87,15 +87,48 @@ class BrandController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $brand = Brand::findOrFail($id);
+        return view('admin.brands.edit', compact('brand'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateBrandRequest $request, string $id, ImageService $imageService)
     {
-        //
+        $brand = Brand::findOrFail($id);
+
+        // Retrieve the validated input data
+        $validatedData = $request->validated();
+        $brand->name = $validatedData['name'];
+
+        // Generate slug from the provided input or fallback to name
+        $brand->slug = !empty($request->slug) ? Str::slug($request->slug) : Str::slug($validatedData['name']);
+
+        // Set status: 1 if active, 0 otherwise
+        $brand->status = $request->has('status') ? 1 : 0;
+
+        // Handle image upload if present
+        if ($request->hasFile('image')) {
+
+            // Delete old image files if they exist (now works because $brand is loaded)
+            if ($brand->image) {
+                @unlink(public_path('uploads/brands/' . $brand->image));
+                @unlink(public_path('uploads/brands/thumbnails/' . $brand->image));
+            }
+
+            $file = $request->file('image');
+            $imageName = time() . "_" . uniqid() . "." . $file->getClientOriginalExtension();
+            $imageService->generateThumbnailImage($file, $imageName, 'uploads/brands', 124, 124);
+            $file->move(public_path('uploads/brands'), $imageName);
+
+            $brand->image = $imageName;
+        }
+
+        $brand->save();
+
+        // Redirect to the index page with a success message
+        return redirect()->route('admin.brands.index')->with('success', 'Brand updated successfully!');
     }
 
     /**
