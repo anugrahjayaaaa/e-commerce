@@ -103,11 +103,14 @@
                                             title="Edit">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
-                                        <button
+                                        {{-- delete --}}
+                                        <button type="button"
                                             class="w-8 h-8 rounded-full hover:bg-gray-100 text-red-500 transition flex items-center justify-center"
-                                            onclick="deleteBrand(this, 'Samsung', 101)" title="Delete">
+                                            onclick="openDeleteModal('{{ $brand->name }}', '{{ route('admin.brands.destroy', $brand) }}', 'brand')"
+                                            title="Delete">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
+
                                     </div>
                                 </td>
                             </tr>
@@ -137,4 +140,9 @@
             </div>
         </div>
     </main>
+    {{-- delete modal --}}
+    @include('admin.partials.delete-modal')
+
+    {{-- custom script delete modal --}}
+    @include('admin.partials.script-delete-modal')
 </x-admin-layout>
