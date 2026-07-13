@@ -22,7 +22,7 @@
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                             <i class="fa-solid fa-search text-gray-400"></i>
                         </span>
-                        <input type="text" ame="search" value="{{ request('search') }}"
+                        <input type="text" name="search" value="{{ request('search') }}"
                             class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                             placeholder="Search category...">
                     </div>
@@ -61,10 +61,10 @@
                                 <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
                             </th>
                             <th class="px-6 py-4">ID</th>
-                            <th class="px-6 py-4">Image/Icon</th>
+                            <th class="px-6 py-4">Logo/th>
                             <th class="px-6 py-4">Category Name</th>
                             <th class="px-6 py-4">Slug</th>
-                            <th class="px-6 py-4">Items</th>
+                            <th class="px-6 py-4">Products</th>
                             <th class="px-6 py-4">Status</th>
                             <th class="px-6 py-4 text-right">Action</th>
                         </tr>
@@ -103,7 +103,7 @@
                                 </td>
                                 {{-- status --}}
                                 <td class="px-6 py-4">
-                                    @if ($brand->status)
+                                    @if ($category->status)
                                         <span
                                             class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold">
                                             Active

@@ -11,28 +11,27 @@
         </div>
 
         <div class="max-w-3xl mx-auto">
-            <form class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-6">
+            <form action={{ route('admin.categories.store') }} method="POST" enctype="multipart/form-data"
+                class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Category Name *</label>
                         <input type="text" id="name" name="name" placeholder="e.g. Furniture"
+                            value="{{ old('name') }}"
                             class="w-full border px-4 py-2 rounded-lg focus:ring-1 focus:ring-primary outline-none">
+                        @error('name')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Category Slug</label>
                         <input type="text" id="slug" name="slug" placeholder="furniture"
+                            value="{{ old('slug') }}"
                             class="w-full border px-4 py-2 rounded-lg bg-gray-50 outline-none">
+                        @error('slug')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Parent Category</label>
-                    <select id="parent_id" name="parent_id"
-                        class="w-full border px-4 py-2 rounded-lg outline-none bg-white">
-                        <option value="">None (Top Level)</option>
-                        <option value="1">Electronics</option>
-                        <option value="2">Home Decor</option>
-                    </select>
                 </div>
 
                 <div>
@@ -54,6 +53,10 @@
 
                             <input type="file" id="upload-image" name="image" class="hidden"
                                 accept="image/png, image/jpeg, image/jpg, image/webp" />
+
+                            @error('image')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
                         </label>
 
                         <button type="button" id="remove-image-btn"
@@ -66,17 +69,21 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <input type="checkbox" id="status"
-                        class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary">
-                    <label for="status" class="text-sm text-gray-700">Set as Active Category</label>
+                    <input type="checkbox" id="status" name="status"
+                        class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" value="1"
+                        {{ old('status') ? 'checked' : '' }}>
+                    <label for="status" class="text-sm text-gray-700">
+                        Set as Active Category
+                    </label>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t">
                     <a href="{{ route('admin.categories.index') }}"
                         class="px-6 py-2 border rounded-lg hover:bg-gray-50 transition text-sm">Cancel</a>
                     <button type="submit"
-                        class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">Save
-                        Category</button>
+                        class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                        Save Category
+                    </button>
                 </div>
             </form>
         </div>
@@ -84,7 +91,7 @@
 
     <!-- Main Content End -->
 
-    {{-- custom scripts--}}
+    {{-- custom scripts --}}
     @include('admin.partials.scripts.slug-generator')
     @include('admin.partials.scripts.image-preview')
 </x-admin-layout>
