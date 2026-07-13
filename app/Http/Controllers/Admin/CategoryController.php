@@ -3,16 +3,40 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+    protected $imageService;
+
+    // Auto inject by Laravel for image service
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('admin.categories.index');
+        $query = Category::query();
+
+        $search = request('search');
+        $status = request('status');
+
+        if ($search) {
+            $query->where('name', 'LIKE', "{$search}");
+        }
+
+        if (request()->filled('status')) {
+            $query->where('status', $status);
+        }
+
+        $categories = $query->orderBy('id', 'DESC')->paginate(10)->withQueryString();
+        return view('admin.categories.index', compact('categories'));
     }
 
     /**
