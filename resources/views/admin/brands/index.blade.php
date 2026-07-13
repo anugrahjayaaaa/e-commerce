@@ -151,8 +151,8 @@
         </div>
     </main>
     {{-- delete modal --}}
-    @include('admin.partials.delete-modal')
+    @include('admin.partials.modals.delete')
 
     {{-- custom script delete modal --}}
-    @include('admin.partials.script-delete-modal')
+    @include('admin.partials..scripts.delete-modal')
 </x-admin-layout>
