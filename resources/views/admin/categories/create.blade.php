@@ -40,7 +40,7 @@
 
                     <div class="relative flex items-center justify-center w-full h-40">
 
-                        <label for="category-image"
+                        <label for="upload-image"
                             class="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden">
 
                             <div id="upload-content" class="flex flex-col items-center justify-center pt-5 pb-6 z-10">
@@ -52,7 +52,7 @@
                                 class="hidden absolute inset-0 w-full h-full object-contain p-2 z-20 bg-white"
                                 src="" alt="Category Image Preview">
 
-                            <input type="file" id="category-image" name="image" class="hidden"
+                            <input type="file" id="upload-image" name="image" class="hidden"
                                 accept="image/png, image/jpeg, image/jpg, image/webp" />
                         </label>
 
@@ -84,5 +84,7 @@
 
     <!-- Main Content End -->
 
-    {{-- custom script --}}
+    {{-- custom scripts--}}
+    @include('admin.partials.scripts.slug-generator')
+    @include('admin.partials.scripts.image-preview')
 </x-admin-layout>

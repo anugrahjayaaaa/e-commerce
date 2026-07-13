@@ -38,7 +38,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Brand Logo *</label>
                     <div class="relative flex items-center justify-center w-full h-40">
 
-                        <label for="brand-image"
+                        <label for="upload-image"
                             class="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden">
 
                             <div id="upload-content" class="flex flex-col items-center justify-center pt-5 pb-6 z-10">
@@ -50,7 +50,7 @@
                                 class="hidden absolute inset-0 w-full h-full object-contain p-2 z-20 bg-white"
                                 src="" alt="Logo Preview">
 
-                            <input id="brand-image" name="image" type="file" class="hidden"
+                            <input id="upload-image" name="image" type="file" class="hidden"
                                 accept="image/png, image/jpeg, image/jpg, image/webp" />
 
                             @error('image')
@@ -58,7 +58,7 @@
                             @enderror
                         </label>
 
-                        <button type="button" id="remove-logo-btn"
+                        <button type="button" id="remove-image-btn"
                             class="hidden absolute top-2 right-2 z-30 bg-white text-red-500 hover:text-white hover:bg-red-500 rounded-full w-8 h-8 flex items-center justify-center shadow-md border border-gray-200 transition-colors focus:outline-none"
                             title="Remove image">
                             <i class="fa-solid fa-xmark"></i>
@@ -69,7 +69,8 @@
 
                 <div class="flex items-center gap-2">
                     <input type="checkbox" id="status" name="status"
-                        class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" value="1" {{ old('status') ? 'checked' : '' }}>
+                        class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" value="1"
+                        {{ old('status') ? 'checked' : '' }}>
                     <label for="status" class="text-sm text-gray-700">Set as Active Brand</label>
                 </div>
 
@@ -77,8 +78,9 @@
                     <a href="{{ route('admin.brands.index') }}"
                         class="px-6 py-2 border rounded-lg hover:bg-gray-50 transition text-sm">Cancel</a>
                     <button type="submit"
-                        class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium shadow-sm">Save
-                        Brand</button>
+                        class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium shadow-sm">
+                        Save Brand
+                    </button>
                 </div>
             </form>
         </div>
@@ -86,7 +88,8 @@
 
     <!-- Main Content End -->
 
-    {{-- script custom for this page --}}
-    @include('admin.brands.partials.script')
+    {{-- custom scripts--}}
+    @include('admin.partials.scripts.slug-generator')
+    @include('admin.partials.scripts.image-preview')
 
 </x-admin-layout>

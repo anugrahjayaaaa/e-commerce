@@ -52,7 +52,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Change Brand Logo</label>
 
                         <div class="relative w-full h-40">
-                            <label for="brand-image"
+                            <label for="upload-image"
                                 class="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden">
 
                                 <div id="upload-content" class="text-center z-10">
@@ -64,11 +64,11 @@
                                     class="hidden absolute inset-0 w-full h-full object-contain p-2 z-20 bg-white"
                                     src="" alt="New Logo Preview">
 
-                                <input type="file" id="brand-image" name="image" class="hidden"
+                                <input type="file" id="upload-image" name="image" class="hidden"
                                     accept="image/png, image/jpeg, image/jpg, image/webp" />
                             </label>
 
-                            <button type="button" id="remove-logo-btn"
+                            <button type="button" id="remove-image-btn"
                                 class="hidden absolute top-2 right-2 z-30 bg-white text-red-500 hover:text-white hover:bg-red-500 rounded-full w-8 h-8 flex items-center justify-center shadow-md border border-gray-200 transition-colors focus:outline-none"
                                 title="Remove new image">
                                 <i class="fa-solid fa-xmark"></i>
@@ -79,7 +79,8 @@
 
                 <div class="flex items-center gap-2">
                     <input type="checkbox" id="status" name="status"
-                        class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" value="1" {{ $brand->status ? 'checked' : '' }}>
+                        class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" value="1"
+                        {{ $brand->status ? 'checked' : '' }}>
                     <label for="status" class="text-sm text-gray-700">Set as Active Brand</label>
                 </div>
 
@@ -87,7 +88,9 @@
                     <a href="{{ route('admin.brands.index') }}"
                         class="px-6 py-2 border rounded-lg hover:bg-gray-50 transition text-sm">Cancel</a>
                     <button type="submit"
-                        class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium shadow-sm">Update Brand</button>
+                        class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium shadow-sm">
+                        Update Brand
+                    </button>
                 </div>
             </form>
         </div>
@@ -95,7 +98,8 @@
 
     <!-- Main Content End -->
 
-    {{-- script custom for this page --}}
-    @include('admin.brands.partials.script')
+    {{-- custom scripts--}}
+    @include('admin.partials.scripts.slug-generator')
+    @include('admin.partials.scripts.image-preview')
 
 </x-admin-layout>
