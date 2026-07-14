@@ -37,8 +37,8 @@ class ProductController extends Controller
      */
     public function create()
     {
-        $brands = Brand::select('id', 'name')->orderBy('name')->get();
-        $categories = Category::select('id', 'name')->orderBy('name')->get();
+        $brands = Brand::select(['id', 'name'])->orderBy('name')->get();
+        $categories = Category::select(['id', 'name'])->orderBy('name')->get();
 
         return view('admin.products.create', compact('brands', 'categories'));
     }
@@ -129,8 +129,8 @@ class ProductController extends Controller
     {
 
         $product = Product::findOrFail($id);
-        $brands = Brand::select('id', 'name')->orderBy('name')->get();
-        $categories = Category::select('id', 'name')->orderBy('name')->get();
+        $brands = Brand::select(['id', 'name'])->orderBy('name')->get();
+        $categories = Category::select(['id', 'name'])->orderBy('name')->get();
 
         return view('admin.products.edit', compact('product', 'brands', 'categories'));
     }
