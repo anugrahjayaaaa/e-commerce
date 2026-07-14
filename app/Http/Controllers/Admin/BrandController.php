@@ -144,13 +144,17 @@ class BrandController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id, ImageService $imageService)
     {
         $brand = Brand::findOrFail($id);
 
+        // Delete the main image and its thumbnail if they exist
         if ($brand->image) {
-            @unlink(public_path($this->imagePath . $brand->image));
-            @unlink(public_path($this->thumbnailPath . $brand->image));
+            $imageService->deleteSingleImage(
+                $brand->image,
+                $this->imagePath,
+                $this->thumbnailPath
+            );
         }
 
         $brand->delete();

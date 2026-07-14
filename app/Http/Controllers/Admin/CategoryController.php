@@ -151,13 +151,17 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id, ImageService $imageService)
     {
         $category = Category::findOrFail($id);
 
+        // Delete the main image and its thumbnail if they exist
         if ($category->image) {
-            @unlink(public_path('uploads/categories/' . $category->image));
-            @unlink(public_path($this->thumbnailPath . $category->image));
+            $imageService->deleteSingleImage(
+                $category->image,
+                $this->imagePath,
+                $this->thumbnailPath
+            );
         }
 
         $category->delete();

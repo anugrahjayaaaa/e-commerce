@@ -226,29 +226,30 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id, ImageService $imageService)
     {
         $product = Product::findOrFail($id);
 
-        // 1. Delete main image
+        // 1. Delete the main product image and its thumbnail
         if ($product->image) {
-            @unlink(public_path('uploads/products/' . $product->image));
-            @unlink(public_path('uploads/products/thumbnails/' . $product->image));
+            $imageService->deleteSingleImage(
+                $product->image,
+                $this->imagePath,
+                $this->thumbnailPath
+            );
         }
 
-        // 2. Delete gallery images
+        // 2. Delete all product gallery images and their thumbnails
         if ($product->images) {
-            // Convert the comma-separated string of images into an array
-            $gallery_images = explode(',', $product->images);
+            // Convert the comma-separated string from database into an array
+            $galleryImages = explode(',', $product->images);
 
-            foreach ($gallery_images as $gallery_img) {
-                $gallery_img = trim($gallery_img); // Clean up any accidental spaces
-
-                if (!empty($gallery_img)) {
-                    @unlink(public_path('uploads/products/' . $gallery_img));
-                    @unlink(public_path('uploads/products/thumbnails/' . $gallery_img));
-                }
-            }
+            // Pass the array straight to the service for bulk deletion
+            $imageService->deleteGalleryImages(
+                $galleryImages,
+                $this->imagePath,
+                $this->thumbnailPath
+            );
         }
 
         // 3. Delete the product record from the database
