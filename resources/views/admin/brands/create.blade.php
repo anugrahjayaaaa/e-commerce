@@ -35,40 +35,38 @@
                         @enderror
                     </div>
                 </div>
-                {{-- image--}}
+                {{-- image --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Brand Logo *</label>
-                    <div class="relative flex items-center justify-center w-full h-40">
-                        <div class="relative flex items-center justify-center w-full h-40"
-                            data-upload-group="brand-image">
-                            <label for="upload-image"
-                                class="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden">
+                    <div class="relative flex items-center justify-center w-full h-40" data-upload-group="brand-image">
+                        <label for="upload-image"
+                            class="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden">
 
-                                <div id="upload-content" data-upload="content"
-                                    class="flex flex-col items-center justify-center pt-5 pb-6 z-10">
-                                    <i class="fa-solid fa-image text-3xl text-gray-400 mb-2"></i>
-                                    <p class="text-sm text-gray-500">Upload brand logo (PNG/JPG)</p>
-                                </div>
+                            <div id="upload-content" data-upload="content"
+                                class="flex flex-col items-center justify-center pt-5 pb-6 z-10">
+                                <i class="fa-solid fa-image text-3xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-500">Upload brand logo (PNG/JPG)</p>
+                            </div>
 
-                                <img id="image-preview" data-upload="preview"
-                                    class="hidden absolute inset-0 w-full h-full object-contain p-2 z-20 bg-white"
-                                    src="" alt="Logo Preview">
+                            <img id="image-preview" data-upload="preview"
+                                class="hidden absolute inset-0 w-full h-full object-contain p-2 z-20 bg-white"
+                                src="" alt="Logo Preview">
 
-                                <input id="upload-image" data-upload="input" name="image" type="file"
-                                    class="hidden" accept="image/png, image/jpeg, image/jpg, image/webp" />
+                            <input id="upload-image" data-upload="input" name="image" type="file" class="hidden"
+                                accept="image/png, image/jpeg, image/jpg, image/webp" />
 
-                                @error('image')
-                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                @enderror
-                            </label>
-                            {{-- remove btn --}}
-                            <button type="button" id="remove-image-btn" data-upload="remove"
-                                class="hidden absolute top-2 right-2 z-30 bg-white text-red-500 hover:text-white hover:bg-red-500 rounded-full w-8 h-8 flex items-center justify-center shadow-md border border-gray-200 transition-colors focus:outline-none"
-                                title="Remove image">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>
+                            @error('image')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </label>
+                        {{-- remove btn --}}
+                        <button type="button" id="remove-image-btn" data-upload="remove"
+                            class="hidden absolute top-2 right-2 z-30 bg-white text-red-500 hover:text-white hover:bg-red-500 rounded-full w-8 h-8 flex items-center justify-center shadow-md border border-gray-200 transition-colors focus:outline-none"
+                            title="Remove image">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
                     </div>
+
                 </div>
                 {{-- status --}}
                 <div class="flex items-center gap-2">
