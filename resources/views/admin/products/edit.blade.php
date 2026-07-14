@@ -324,5 +324,6 @@
     @include('admin.partials.scripts.slug-generator')
     @include('admin.partials.scripts.image-upload')
     @include('admin.partials.scripts.images-upload')
+    @include('admin.partials.scripts.image-delete-tracker')
 
 </x-admin-layout>
