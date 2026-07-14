@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Product\StoreProductRequest;
+use App\Http\Requests\Admin\Product\UpdateProductRequest;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
@@ -70,7 +71,7 @@ class ProductController extends Controller
         // Handle image upload if present
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $imageName = $current_time . "." .$image->extension();
+            $imageName = $current_time . "." . $image->extension();
 
             $imageService->resizeAndSaveImage($image, $imageName, 'uploads/products', 507, 604);
             $imageService->resizeAndSaveImage($image, $imageName, 'uploads/products/thumbnails', 270, 303);
@@ -110,7 +111,7 @@ class ProductController extends Controller
         $product->save();
 
         // Redirect to the index page with a success message
-        return redirect()->route('admin.products.index')->with('success', 'Category created successfully!');
+        return redirect()->route('admin.products.index')->with('success', 'Product created successfully!');
     }
 
     /**
@@ -126,15 +127,128 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        //
+
+        $product = Product::findOrFail($id);
+        $brands = Brand::select('id', 'name')->orderBy('name')->get();
+        $categories = Category::select('id', 'name')->orderBy('name')->get();
+
+        return view('admin.products.edit', compact('product', 'brands', 'categories'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProductRequest $request, string $id, ImageService $imageService)
     {
-        //
+        $validatedData = $request->validated();
+
+        $product = Product::findOrFail($id);
+
+        $product->name = $validatedData['name'];
+        $product->slug = $validatedData['slug'];
+        $product->short_description = $validatedData['short_description'];
+        $product->information = $validatedData['information'];
+        $product->description = $validatedData['description'];
+        $product->regular_price = $validatedData['regular_price'];
+        $product->sale_price = $validatedData['sale_price'];
+        $product->SKU = $validatedData['SKU'];
+        $product->stock_status = $validatedData['stock_status'];
+        $product->featured = $validatedData['featured'];
+        $product->status = $validatedData['status'];
+        $product->quantity = $validatedData['quantity'];
+        $product->brand_id = $validatedData['brand_id'];
+        $product->category_id = $validatedData['category_id'];
+
+        $current_time = time();
+
+        // Handle image upload if present (Main Image)
+        if ($request->hasFile('image')) {
+            // FIXED: Added '/' before the filename to prevent incorrect path concatenation
+            if ($product->image) {
+                @unlink(public_path('uploads/products/' . $product->image));
+                @unlink(public_path('uploads/products/thumbnails/' . $product->image));
+            }
+
+            $image = $request->file('image');
+            $imageName = $current_time . "." . $image->extension();
+
+            $imageService->resizeAndSaveImage($image, $imageName, 'uploads/products', 507, 604);
+            $imageService->resizeAndSaveImage($image, $imageName, 'uploads/products/thumbnails', 270, 303);
+
+            $product->image = $imageName;
+        }
+
+        // Optional: Handle case where user deletes the Main Image via the trash button (without uploading a new one)
+        if ($request->has('deleted_main_image') && !$request->hasFile('image')) {
+            if ($product->image) {
+                @unlink(public_path('uploads/products/' . $product->image));
+                @unlink(public_path('uploads/products/thumbnails/' . $product->image));
+            }
+            $product->image = null;
+        }
+
+        // ==========================================
+        // HANDLE IMAGES UPLOAD (GALLERY) FOR UPDATE
+        // ==========================================
+
+        // 1. Convert current gallery images from database into an array
+        $current_gallery = $product->images ? explode(',', $product->images) : [];
+
+        // 2. PROCESS DELETIONS
+        // FIXED: Changed from 'deleted_images' to 'deleted_gallery_images' to match the HTML/Blade input name
+        if ($request->has('deleted_gallery_images')) {
+            $deleted_images = (array) $request->input('deleted_gallery_images');
+
+            foreach ($deleted_images as $del_img) {
+                // Trim whitespace if any
+                $del_img = trim($del_img);
+
+                if (in_array($del_img, $current_gallery)) {
+                    // FIXED: Added '/' before the filename so unlink can correctly locate the path
+                    @unlink(public_path('uploads/products/' . $del_img));
+                    @unlink(public_path('uploads/products/thumbnails/' . $del_img));
+
+                    // Remove the file name from the current gallery array queue
+                    $current_gallery = array_diff($current_gallery, [$del_img]);
+                }
+            }
+        }
+
+        // 3. PROCESS NEW UPLOADS
+        if ($request->hasFile('images')) {
+            $allowedfileExtion = ['jpg', 'png', 'jpeg', 'webp'];
+            $files = $request->file('images');
+
+            // Continue the counter from the number of remaining images + 1 to prevent filename conflicts
+            $counter = count($current_gallery) + 1;
+
+            foreach ($files as $file) {
+                $gextension = $file->getClientOriginalExtension();
+                $gcheck = in_array($gextension, $allowedfileExtion);
+
+                if ($gcheck) {
+                    // Using uniqid() ensures the filename is completely unique and won't overwrite older files with the same counter
+                    $gimageName = $current_time . "-" . $counter . "-" . uniqid() . "." . $gextension;
+
+                    $imageService->resizeAndSaveImage($file, $gimageName, 'uploads/products', 570, 604);
+                    $imageService->resizeAndSaveImage($file, $gimageName, 'uploads/products/thumbnails', 270, 303);
+
+                    // Push the new filename into the updated gallery array
+                    array_push($current_gallery, $gimageName);
+                    $counter++;
+                }
+            }
+        }
+
+        // 4. Merge the array back into a comma-separated string to save into the database
+        // Re-index the array using array_values after array_diff has modified it
+        $current_gallery = array_values($current_gallery);
+        $product->images = !empty($current_gallery) ? implode(',', $current_gallery) : null;
+
+        $product->save();
+
+        // Redirect to the index page with a success message
+        return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');
     }
 
     /**
@@ -142,6 +256,34 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $product = Product::findOrFail($id);
+
+        // 1. Delete main image
+        if ($product->image) {
+            @unlink(public_path('uploads/products/' . $product->image));
+            @unlink(public_path('uploads/products/thumbnails/' . $product->image));
+        }
+
+        // 2. Delete gallery images
+        if ($product->images) {
+            // Convert the comma-separated string of images into an array
+            $gallery_images = explode(',', $product->images);
+
+            foreach ($gallery_images as $gallery_img) {
+                $gallery_img = trim($gallery_img); // Clean up any accidental spaces
+
+                if (!empty($gallery_img)) {
+                    @unlink(public_path('uploads/products/' . $gallery_img));
+                    @unlink(public_path('uploads/products/thumbnails/' . $gallery_img));
+                }
+            }
+        }
+
+        // 3. Delete the product record from the database
+        $product->delete();
+
+        // Redirect to the index page with a success message
+        // Note: Fixed the success message from 'Brand...' to 'Product deleted successfully!'
+        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
     }
 }

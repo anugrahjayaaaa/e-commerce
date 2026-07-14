@@ -77,7 +77,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Regular Price ($)</label>
                                 <input type="number" id="regular_price" name="regular_price"
-                                    value=" {{ old('regular_price') }}" placeholder="0.00"
+                                    value="{{ old('regular_price') }}" placeholder="0.00"
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary text-sm">
                                 @error('regular_price')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -86,8 +86,8 @@
                             {{-- sale price --}}
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Sale Price ($)</label>
-                                <input type="number" id="sale_price" value=" {{ old('regular_price') }}"
-                                    name="sale_price" placeholder="0.00"
+                                <input type="number" id="sale_price" value="{{ old('sale_price') }}" name="sale_price"
+                                    placeholder="0.00"
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary text-sm">
                                 @error('sale_price')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -121,7 +121,7 @@
                             {{-- quantity --}}
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-                                <input type="number" id="quantity" name="quantity" value=" {{ old('quantity') }}"
+                                <input type="number" id="quantity" name="quantity" value="{{ old('quantity') }}"
                                     placeholder="Total items"
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary text-sm">
                                 @error('quantity')
@@ -140,7 +140,7 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-sm text-gray-600">Status:</span>
                                 <select id="status" name="status"
-                                    class="border rounded text-sm px-2 py-1 bg-white focus:outline-none">
+                                    class="border rounded text-sm pl-4 pr-10 py-1 bg-white focus:outline-none">
                                     <option value="0" {{ old('status') ? '' : 'selected' }}>Draft</option>
                                     <option value="1" {{ old('status') ? 'selected ' : '' }}>Published</option>
                                 </select>
