@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin\Category;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreCategoryRequest extends FormRequest
 {
@@ -23,7 +24,18 @@ class StoreCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
+        // Get the current category ID for update scenarios
+        $categoryId = $this->route('category')?->id;
+
         return [
+            'parent_id' => [
+                'nullable',
+                'integer',
+                // Verify that the parent_id exists in the categories table
+                'exists:categories,id',
+                // Prevent the category from being its own parent
+                Rule::notIn($categoryId),
+            ],
             'name' => 'required|string|max:255',
             // 'unique' rule will throw an error if the slug exists
             'slug' => 'nullable|string|max:255|unique:categories,slug',

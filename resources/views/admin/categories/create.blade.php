@@ -35,6 +35,23 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Parent Category</label>
+                    <select name="parent_id" id="parent_id"
+                        class="w-full border px-4 py-2 rounded-lg focus:ring-1 focus:ring-primary outline-none">
+                        <option value="">-- Select Parent Category --</option>
+                        @foreach ($parentCategories as $parentCategory)
+                            <option value="{{ $parentCategory->id }}"
+                                {{ old('parent_id') == $parentCategory->id ? 'selected' : '' }}>
+                                {{ $parentCategory->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('parent_id')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Category Image</label>
 
                     <div class="relative flex items-center justify-center w-full h-40">
