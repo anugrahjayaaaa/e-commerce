@@ -3,29 +3,29 @@
 
     <main class="flex-1 overflow-y-auto p-6">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Add New Brand</h1>
-            <a href="{{ route('admin.brands.index') }}"
+            <h1 class="text-2xl font-bold text-gray-800">Add New Category</h1>
+            <a href="{{ route('admin.categories.index') }}"
                 class="border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2">
-                <i class="fa-solid fa-arrow-left"></i> Back to Brands
+                <i class="fa-solid fa-arrow-left"></i> Back to Categories
             </a>
         </div>
+
         <div class="max-w-3xl mx-auto">
-            <form action={{ route('admin.brands.store') }} method="POST" enctype="multipart/form-data"
+            <form action={{ route('admin.categories.store') }} method="POST" enctype="multipart/form-data"
                 class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-6">
-                @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Brand Name *</label>
-                        <input type="text" id="name" name="name" placeholder="e.g. Samsung"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Category Name *</label>
+                        <input type="text" id="name" name="name" placeholder="e.g. Furniture"
                             value="{{ old('name') }}"
-                            class="w-full border px-4 py-2 rounded-lg outline-none focus:ring-1 focus:ring-primary">
+                            class="w-full border px-4 py-2 rounded-lg focus:ring-1 focus:ring-primary outline-none">
                         @error('name')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Brand Slug</label>
-                        <input type="text" id="slug" name="slug" placeholder="samsung"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Category Slug</label>
+                        <input type="text" id="slug" name="slug" placeholder="furniture"
                             value="{{ old('slug') }}"
                             class="w-full border px-4 py-2 rounded-lg bg-gray-50 outline-none">
                         @error('slug')
@@ -35,22 +35,23 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Brand Logo *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Category Image</label>
+
                     <div class="relative flex items-center justify-center w-full h-40">
 
                         <label for="upload-image"
                             class="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden">
 
                             <div id="upload-content" class="flex flex-col items-center justify-center pt-5 pb-6 z-10">
-                                <i class="fa-solid fa-image text-3xl text-gray-400 mb-2"></i>
-                                <p class="text-sm text-gray-500">Upload brand logo (PNG/JPG)</p>
+                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-500">Upload category icon or image</p>
                             </div>
 
                             <img id="image-preview"
                                 class="hidden absolute inset-0 w-full h-full object-contain p-2 z-20 bg-white"
-                                src="" alt="Logo Preview">
+                                src="" alt="Category Image Preview">
 
-                            <input id="upload-image" name="image" type="file" class="hidden"
+                            <input type="file" id="upload-image" name="image" class="hidden"
                                 accept="image/png, image/jpeg, image/jpg, image/webp" />
 
                             @error('image')
@@ -71,15 +72,17 @@
                     <input type="checkbox" id="status" name="status"
                         class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" value="1"
                         {{ old('status') ? 'checked' : '' }}>
-                    <label for="status" class="text-sm text-gray-700">Set as Active Brand</label>
+                    <label for="status" class="text-sm text-gray-700">
+                        Set as Active Category
+                    </label>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t">
-                    <a href="{{ route('admin.brands.index') }}"
+                    <a href="{{ route('admin.categories.index') }}"
                         class="px-6 py-2 border rounded-lg hover:bg-gray-50 transition text-sm">Cancel</a>
                     <button type="submit"
-                        class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium shadow-sm">
-                        Save Brand
+                        class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                        Save Category
                     </button>
                 </div>
             </form>
@@ -88,8 +91,7 @@
 
     <!-- Main Content End -->
 
-    {{-- custom scripts--}}
+    {{-- custom scripts --}}
     @include('admin.partials.scripts.slug-generator')
     @include('admin.partials.scripts.image-preview')
-
 </x-admin-layout>
