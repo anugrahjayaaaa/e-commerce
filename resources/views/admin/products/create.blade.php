@@ -151,7 +151,7 @@
                             {{-- featured --}}
                             <div class="flex items-center gap-2 pt-2">
                                 <input type="checkbox" id="featured" name="featured" value="1"
-                                    {{ old('featured') ? 'checked   ' : ' ' }}
+                                    {{ old('featured') == '1' || old('featured') === true ? 'checked' : '' }}
                                     class="rounded border-gray-300 text-primary focus:ring-primary">
                                 <label for="featured" class="text-sm text-gray-700 cursor-pointer">
                                     This is a featured product

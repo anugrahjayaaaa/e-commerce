@@ -99,9 +99,9 @@
                                     </div>
                                 </td>
                                 {{-- brand --}}
-                                <td class="px-6 py-4 text-sm text-gray-600">{{ $product->brand->name }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ !empty($product->brand->name) ? $product->brand->name : '-' }}</td>
                                 {{-- category --}}
-                                <td class="px-6 py-4 text-sm text-gray-600">{{ $product->category->name }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ !empty($product->category->name) ? $product->category->name : '-' }}</td>
                                 {{-- price --}}
                                 <td class="px-6 py-4 text-sm font-medium text-gray-800">
                                     @if ($product->sale_price)
