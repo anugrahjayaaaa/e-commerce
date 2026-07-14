@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
@@ -37,6 +38,9 @@ Route::middleware([AuthAdmin::class])->prefix('admin')->name('admin.')->group(fu
 
     // categories
     Route::resource('categories', CategoryController::class);
+
+    // products
+    Route::resource('products', ProductController::class);
 });
 
 require __DIR__ . '/auth.php';
