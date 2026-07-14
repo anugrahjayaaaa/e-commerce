@@ -79,35 +79,22 @@ class ProductController extends Controller
             );
         }
 
-        // Handle images upload if present
-        $gallery_arr = [];
-        $gallery_images = "";
-        $counter = 1;
-
+        // Handle product gallery images upload if present
         if ($request->hasFile('images')) {
-            $allowedfileExtion = ['jpg', 'png', 'jpeg', 'webp'];
-            $files = $request->file('images');
+            $galleryFiles = $request->file('images');
 
-            foreach ($files as $file) {
-                $gextension = $file->getClientOriginalExtension();
-                $gcheck = in_array($gextension, $allowedfileExtion);
+            // Process the new gallery uploads via ImageService
+            $galleryArray = $imageService->processGalleryImages(
+                $galleryFiles,
+                $this->imagePath,
+                ['w' => 570, 'h' => 604],
+                $this->thumbnailPath,
+                ['w' => 270, 'h' => 303]
+            );
 
-                if ($gcheck) {
-                    $gimageName = time() . "_" . uniqid() . "-" . $counter . "." . $gextension;
-
-                    $imageService->resizeAndSaveImage($file, $gimageName, $this->imagePath, 570, 604);
-                    // thumbnails
-                    $imageService->resizeAndSaveImage($file, $gimageName, $this->thumbnailPath, 270, 303);
-
-                    array_push($gallery_arr, $gimageName);
-                    $counter = $counter + 1;
-                }
-            }
-
-            $gallery_images = implode(',', $gallery_arr);
+            // Save comma-separated string to the database
+            $product->images = !empty($galleryArray) ? implode(',', $galleryArray) : null;
         }
-
-        $product->images = $gallery_images;
 
         $product->save();
 
@@ -173,12 +160,18 @@ class ProductController extends Controller
             );
         }
 
-        // Optional: Handle case where user deletes the Main Image via the trash button (without uploading a new one)
+        // Optional: Handle case where user explicitly deletes the Main Image via the trash button (without uploading a new one)
         if ($request->has('deleted_main_image') && !$request->hasFile('image')) {
             if ($product->image) {
-                @unlink(public_path('uploads/products/' . $product->image));
-                @unlink(public_path('uploads/products/thumbnails/' . $product->image));
+                // Remove both main and thumbnail files physically using the service
+                $imageService->deleteSingleImage(
+                    $product->image,
+                    $this->imagePath,
+                    $this->thumbnailPath
+                );
             }
+
+            // Clear the column record in the database
             $product->image = null;
         }
 
@@ -186,59 +179,43 @@ class ProductController extends Controller
         // HANDLE IMAGES UPLOAD (GALLERY) FOR UPDATE
         // ==========================================
 
-        // 1. Convert current gallery images from database into an array
-        $current_gallery = $product->images ? explode(',', $product->images) : [];
+        // Convert current gallery images from database into an array format
+        $currentGallery = $product->images ? explode(',', $product->images) : [];
 
-        // 2. PROCESS DELETIONS
-        // FIXED: Changed from 'deleted_images' to 'deleted_gallery_images' to match the HTML/Blade input name
+        // Step 1: Handle requested image deletions
         if ($request->has('deleted_gallery_images')) {
-            $deleted_images = (array) $request->input('deleted_gallery_images');
+            $deletedImages = (array) $request->input('deleted_gallery_images');
 
-            foreach ($deleted_images as $del_img) {
-                // Trim whitespace if any
-                $del_img = trim($del_img);
+            // Filter to ensure we only attempt to delete images that actually exist in the gallery records
+            $validDeletions = array_intersect($deletedImages, $currentGallery);
 
-                if (in_array($del_img, $current_gallery)) {
-                    // FIXED: Added '/' before the filename so unlink can correctly locate the path
-                    @unlink(public_path('uploads/products/' . $del_img));
-                    @unlink(public_path('uploads/products/thumbnails/' . $del_img));
+            if (!empty($validDeletions)) {
+                // Remove files physically from storage using service
+                $imageService->deleteGalleryImages($validDeletions, $this->imagePath, $this->thumbnailPath);
 
-                    // Remove the file name from the current gallery array queue
-                    $current_gallery = array_diff($current_gallery, [$del_img]);
-                }
+                // Remove the deleted filenames from the database tracking queue
+                $currentGallery = array_diff($currentGallery, $validDeletions);
             }
         }
 
-        // 3. PROCESS NEW UPLOADS
+        // Step 2: Handle new image uploads for the gallery
         if ($request->hasFile('images')) {
-            $allowedfileExtion = ['jpg', 'png', 'jpeg', 'webp'];
-            $files = $request->file('images');
+            $newGalleryFiles = $request->file('images');
 
-            // Continue the counter from the number of remaining images + 1 to prevent filename conflicts
-            $counter = count($current_gallery) + 1;
-
-            foreach ($files as $file) {
-                $gextension = $file->getClientOriginalExtension();
-                $gcheck = in_array($gextension, $allowedfileExtion);
-
-                if ($gcheck) {
-                    // Using uniqid() ensures the filename is completely unique and won't overwrite older files with the same counter
-                    $gimageName = time() . "-" . uniqid() . "-" . $counter . "." . $gextension;
-
-                    $imageService->resizeAndSaveImage($file, $gimageName, $this->imagePath, 570, 604);
-                    $imageService->resizeAndSaveImage($file, $gimageName, $this->thumbnailPath, 270, 303);
-
-                    // Push the new filename into the updated gallery array
-                    array_push($current_gallery, $gimageName);
-                    $counter++;
-                }
-            }
+            // Process and append new images to the existing gallery array
+            $currentGallery = $imageService->processGalleryImages(
+                $newGalleryFiles,
+                $this->imagePath,
+                ['w' => 570, 'h' => 604],
+                $this->thumbnailPath,
+                ['w' => 270, 'h' => 303],
+                $currentGallery // Pass the existing remaining images to maintain index tracking
+            );
         }
 
-        // 4. Merge the array back into a comma-separated string to save into the database
-        // Re-index the array using array_values after array_diff has modified it
-        $current_gallery = array_values($current_gallery);
-        $product->images = !empty($current_gallery) ? implode(',', $current_gallery) : null;
+        // Step 3: Sync and update database record
+        $currentGallery = array_values($currentGallery); // Re-index array keys cleanly
+        $product->images = !empty($currentGallery) ? implode(',', $currentGallery) : null;
 
         $product->save();
 

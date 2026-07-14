@@ -67,6 +67,100 @@ class ImageService
         return $imageName;
     }
 
+    /**
+     * Delete a single image and its corresponding thumbnail from storage.
+     *
+     * @param string $imageName The filename stored in the database
+     * @param string $mainPath Directory of the main image
+     * @param string|null $thumbPath Directory of the thumbnail
+     * @return void
+     */
+    public function deleteSingleImage(string $imageName, string $mainPath, ?string $thumbPath = null): void
+    {
+        // Format and delete from the main directory
+        $mainFilePath = str_contains($mainPath, 'public/') || str_contains($mainPath, 'uploads/') ? public_path(rtrim($mainPath, '/') . '/' . $imageName) : rtrim($mainPath, '/') . '/' . $imageName;
+        if (file_exists($mainFilePath)) {
+            @unlink($mainFilePath);
+        }
+
+        // Format and delete from the thumbnail directory if provided
+        if ($thumbPath) {
+            $thumbFilePath = str_contains($thumbPath, 'public/') || str_contains($thumbPath, 'uploads/') ? public_path(rtrim($thumbPath, '/') . '/' . $imageName) : rtrim($thumbPath, '/') . '/' . $imageName;
+            if (file_exists($thumbFilePath)) {
+                @unlink($thumbFilePath);
+            }
+        }
+    }
+
+    /**
+     * Handle multiple image uploads for a product gallery.
+     *
+     * @param array $files Array of UploadedFile objects
+     * @param string $mainPath Directory for main images
+     * @param array $mainDims Main dimensions ['w' => int, 'h' => int]
+     * @param string $thumbPath Directory for thumbnails
+     * @param array $thumbDims Thumbnail dimensions ['w' => int, 'h' => int]
+     * @param array $currentGallery Existing image names array to append to
+     * @return array Updated gallery array containing filenames
+     */
+    public function processGalleryImages(
+        array $files,
+        string $mainPath,
+        array $mainDims,
+        string $thumbPath,
+        array $thumbDims,
+        array $currentGallery = []
+    ): array {
+        $allowedExtensions = ['jpg', 'png', 'jpeg', 'webp'];
+        $counter = count($currentGallery) + 1;
+
+        foreach ($files as $file) {
+            $extension = $file->getClientOriginalExtension();
+
+            // Validate file extension
+            if (in_array(strtolower($extension), $allowedExtensions)) {
+                $imageName = time() . "_" . uniqid() . "-" . $counter . "." . $extension;
+
+                // Process and save main gallery image
+                $this->resizeAndSaveImage($file, $imageName, $mainPath, $mainDims['w'], $mainDims['h']);
+
+                // Process and save gallery thumbnail
+                $this->resizeAndSaveImage($file, $imageName, $thumbPath, $thumbDims['w'], $thumbDims['h']);
+
+                $currentGallery[] = $imageName;
+                $counter++;
+            }
+        }
+
+        return $currentGallery;
+    }
+
+    /**
+     * Handle physical deletion of gallery images from storage.
+     *
+     * @param array $imagesToDelete Array of image names to delete
+     * @param string $mainPath Directory of main images
+     * @param string $thumbPath Directory of thumbnails
+     * @return void
+     */
+    public function deleteGalleryImages(array $imagesToDelete, string $mainPath, string $thumbPath): void
+    {
+        foreach ($imagesToDelete as $image) {
+            $image = trim($image);
+
+            // Format paths correctly ensuring they target the public folder
+            $mainFilePath = str_contains($mainPath, 'public/') || str_contains($mainPath, 'uploads/') ? public_path(rtrim($mainPath, '/') . '/' . $image) : rtrim($mainPath, '/') . '/' . $image;
+            $thumbFilePath = str_contains($thumbPath, 'public/') || str_contains($thumbPath, 'uploads/') ? public_path(rtrim($thumbPath, '/') . '/' . $image) : rtrim($thumbPath, '/') . '/' . $image;
+
+            if (file_exists($mainFilePath)) {
+                @unlink($mainFilePath);
+            }
+            if (file_exists($thumbFilePath)) {
+                @unlink($thumbFilePath);
+            }
+        }
+    }
+
     public function resizeAndSaveImage($image, $imageName, $folder, $width, $height)
     {
         $savePath = public_path($folder);
