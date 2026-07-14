@@ -14,6 +14,7 @@
             <form action={{ route('admin.categories.store') }} method="POST" enctype="multipart/form-data"
                 class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {{-- name --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Category Name *</label>
                         <input type="text" id="name" name="name" placeholder="e.g. Furniture"
@@ -23,6 +24,7 @@
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+                    {{-- slug --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Category Slug</label>
                         <input type="text" id="slug" name="slug" placeholder="furniture"
@@ -33,7 +35,7 @@
                         @enderror
                     </div>
                 </div>
-
+                {{-- parent category --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Parent Category</label>
                     <select name="parent_id" id="parent_id"
@@ -50,25 +52,25 @@
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-
+                {{-- image --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Category Image</label>
 
-                    <div class="relative flex items-center justify-center w-full h-40">
-
+                    <div class="relative flex items-center justify-center w-full h-40" data-upload-group="image">
                         <label for="upload-image"
                             class="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden">
 
-                            <div id="upload-content" class="flex flex-col items-center justify-center pt-5 pb-6 z-10">
+                            <div id="upload-content" data-upload="content"
+                                class="flex flex-col items-center justify-center pt-5 pb-6 z-10">
                                 <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-2"></i>
                                 <p class="text-sm text-gray-500">Upload category icon or image</p>
                             </div>
 
-                            <img id="image-preview"
+                            <img id="image-preview" data-upload="preview"
                                 class="hidden absolute inset-0 w-full h-full object-contain p-2 z-20 bg-white"
                                 src="" alt="Category Image Preview">
 
-                            <input type="file" id="upload-image" name="image" class="hidden"
+                            <input id="upload-image" data-upload="input" name="image" type="file" class="hidden"
                                 accept="image/png, image/jpeg, image/jpg, image/webp" />
 
                             @error('image')
@@ -76,7 +78,7 @@
                             @enderror
                         </label>
 
-                        <button type="button" id="remove-image-btn"
+                        <button type="button" id="remove-image-btn" data-upload="remove"
                             class="hidden absolute top-2 right-2 z-30 bg-white text-red-500 hover:text-white hover:bg-red-500 rounded-full w-8 h-8 flex items-center justify-center shadow-md border border-gray-200 transition-colors focus:outline-none"
                             title="Remove image">
                             <i class="fa-solid fa-xmark"></i>
@@ -84,7 +86,7 @@
 
                     </div>
                 </div>
-
+                {{-- status --}}
                 <div class="flex items-center gap-2">
                     <input type="checkbox" id="status" name="status"
                         class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary" value="1"
@@ -93,7 +95,7 @@
                         Set as Active Category
                     </label>
                 </div>
-
+                {{-- actions --}}
                 <div class="flex justify-end gap-3 pt-4 border-t">
                     <a href="{{ route('admin.categories.index') }}"
                         class="px-6 py-2 border rounded-lg hover:bg-gray-50 transition text-sm">Cancel</a>
@@ -110,5 +112,5 @@
 
     {{-- custom scripts --}}
     @include('admin.partials.scripts.slug-generator')
-    @include('admin.partials.scripts.image-preview')
+    @include('admin.partials.scripts.image-upload')
 </x-admin-layout>
