@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
 
-    protected $imageService;
+    protected ImageService $imageService;
 
     // Auto inject by Laravel for image service
     public function __construct(ImageService $imageService)

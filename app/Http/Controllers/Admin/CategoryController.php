@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
-    protected $imageService;
+    protected ImageService $imageService;
 
     // Auto inject by Laravel for image service
     public function __construct(ImageService $imageService)
