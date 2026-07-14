@@ -270,11 +270,11 @@
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Product Gallery Images</h3>
 
-                        <label for="product-images"
+                        <label for="upload-images"
                             class="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition cursor-pointer mb-4">
                             <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-2"></i>
                             <p class="text-sm text-gray-500">Upload New Gallery Images</p>
-                            <input type="file" id="product-images" name="images[]" class="hidden" multiple
+                            <input type="file" id="upload-images" name="images[]" class="hidden" multiple
                                 accept="image/png, image/jpeg, image/jpg, image/webp">
                         </label>
                         @if ($errors->has('images') || $errors->has('images.*'))
@@ -323,5 +323,6 @@
     {{-- custom scripts --}}
     @include('admin.partials.scripts.slug-generator')
     @include('admin.partials.scripts.image-upload')
+    @include('admin.partials.scripts.images-upload')
 
 </x-admin-layout>

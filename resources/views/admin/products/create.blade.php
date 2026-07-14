@@ -214,8 +214,8 @@
                             class="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition cursor-pointer">
                             <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-2"></i>
                             <p class="text-sm text-gray-500">Click to upload main image</p>
-                            <input type="file" id="upload-image" data-upload="input" name="image" class="hidden"
-                                accept="image/png, image/jpeg, image/jpg, image/webp">
+                            <input type="file" id="upload-image" data-upload="input" name="image"
+                                class="hidden" accept="image/png, image/jpeg, image/jpg, image/webp">
                         </label>
                         @error('image')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -237,11 +237,11 @@
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Product Gallery Images</h3>
 
-                        <label for="product-images"
+                        <label for="upload-images"
                             class="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition cursor-pointer">
                             <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-2"></i>
                             <p class="text-sm text-gray-500">Click to upload multiple gallery images</p>
-                            <input type="file" id="product-images" name="images[]" class="hidden" multiple
+                            <input type="file" id="upload-images" name="images[]" class="hidden" multiple
                                 accept="image/png, image/jpeg, image/jpg, image/webp">
                         </label>
                         @if ($errors->has('images') || $errors->has('images.*'))
@@ -254,10 +254,8 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </form>
-
     </main>
 
     <!-- Main Content End -->
@@ -265,5 +263,6 @@
     {{-- custom scripts --}}
     @include('admin.partials.scripts.slug-generator')
     @include('admin.partials.scripts.image-upload')
+    @include('admin.partials.scripts.images-upload')
 
 </x-admin-layout>
