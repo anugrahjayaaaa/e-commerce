@@ -69,14 +69,14 @@ class ProductController extends Controller
 
         // Handle image upload if present
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . "_" . uniqid() . "." . $image->extension();
-
-            $imageService->resizeAndSaveImage($image, $imageName, $this->imagePath, 507, 604);
-            // thumbnails
-            $imageService->resizeAndSaveImage($image, $imageName, $this->thumbnailPath, 270, 303);
-
-            $product->image = $imageName;
+            $product->image = $imageService->uploadAndProcessImage(
+                $request->file('image'),
+                $this->imagePath,                         // Main directory (stores resized file)
+                true,                                     // Resize the main image instead of moving raw file
+                ['w' => 507, 'h' => 604],                 // Main image dimensions
+                $this->thumbnailPath,                     // Thumbnail directory
+                ['w' => 270, 'h' => 303]                  // Thumbnail dimensions
+            );
         }
 
         // Handle images upload if present
@@ -160,20 +160,17 @@ class ProductController extends Controller
         $product->brand_id = $validatedData['brand_id'];
         $product->category_id = $validatedData['category_id'];
 
-        // Handle image upload if present (Main Image)
+        // Handle image update if a new file is uploaded
         if ($request->hasFile('image')) {
-            if ($product->image) {
-                @unlink(public_path('uploads/products/' . $product->image));
-                @unlink(public_path('uploads/products/thumbnails/' . $product->image));
-            }
-
-            $image = $request->file('image');
-            $imageName = time() . "_" . uniqid() . "." . $image->extension();
-
-            $imageService->resizeAndSaveImage($image, $imageName, $this->imagePath, 507, 604);
-            $imageService->resizeAndSaveImage($image, $imageName, $this->thumbnailPath, 270, 303);
-
-            $product->image = $imageName;
+            $product->image = $imageService->uploadAndProcessImage(
+                $request->file('image'),
+                $this->imagePath,                         // Main directory path
+                true,                                     // Resize the main image instead of moving raw file
+                ['w' => 507, 'h' => 604],                 // Main image dimensions
+                $this->thumbnailPath,                     // Thumbnail directory path
+                ['w' => 270, 'h' => 303],                 // Thumbnail dimensions
+                $product->image                           // Pass the old image name to delete it
+            );
         }
 
         // Optional: Handle case where user deletes the Main Image via the trash button (without uploading a new one)

@@ -72,16 +72,14 @@ class BrandController extends Controller
 
         // Handle image upload if present
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . "_" . uniqid() . "." . $image->extension();
-
-            // Generate thumbnail using the ImageService
-            $imageService->resizeAndSaveImage($image, $imageName, $this->thumbnailPath, 124, 124);
-
-            // Move the original image to the public storage
-            $image->move(public_path('uploads/brands'), $imageName);
-
-            $brand->image = $imageName;
+            $brand->image = $imageService->uploadAndProcessImage(
+                $request->file('image'),
+                public_path('uploads/brands'),            // Main directory (stores raw file)
+                false,                                    // Do not resize the main image
+                null,                                     // Dimensions not required
+                $this->thumbnailPath,                     // Thumbnail directory
+                ['w' => 124, 'h' => 124]                  // Thumbnail dimensions
+            );
         }
 
         $brand->save();
@@ -124,24 +122,17 @@ class BrandController extends Controller
         // Set status: 1 if active, 0 otherwise
         $brand->status = $request->has('status') ? 1 : 0;
 
-        // Handle image upload if present
+        // Handle image update if a new file is uploaded
         if ($request->hasFile('image')) {
-
-            // Delete old image files if they exist (now works because $brand is loaded)
-            if ($brand->image) {
-                @unlink(public_path($this->imagePath . $brand->image));
-                @unlink(public_path($this->thumbnailPath . $brand->image));
-            }
-
-            $image = $request->file('image');
-            $imageName = time() . "_" . uniqid() . "." . $image->extension();
-
-            // Generate thumbnail using the ImageService
-            $imageService->resizeAndSaveImage($image, $imageName, 'uploads/brands/thumbnails', 124, 124);
-
-            $image->move(public_path('uploads/brands'), $imageName);
-
-            $brand->image = $imageName;
+            $brand->image = $imageService->uploadAndProcessImage(
+                $request->file('image'),
+                'uploads/brands',                         // Main directory path
+                false,                                    // Do not resize the main image
+                null,                                     // Dimensions not required
+                $this->thumbnailPath,                     // Thumbnail directory path
+                ['w' => 124, 'h' => 124],                 // Thumbnail dimensions
+                $brand->image                             // Pass the old image name to delete it
+            );
         }
 
         $brand->save();
