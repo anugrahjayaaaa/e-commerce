@@ -12,11 +12,15 @@ use Illuminate\Support\Str;
 class CategoryController extends Controller
 {
     protected ImageService $imageService;
+    protected String $imagePath, $thumbnailPath;
+
 
     // Auto inject by Laravel for image service
     public function __construct(ImageService $imageService)
     {
         $this->imageService = $imageService;
+        $this->imagePath = "uploads/categories/";
+        $this->thumbnailPath = $this->imagePath . "thumbnails/";
     }
 
     /**
@@ -70,14 +74,14 @@ class CategoryController extends Controller
 
         // Handle image upload if present
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $imageName = time() . "_" . uniqid() . "." . $file->getClientOriginalExtension();
+            $image = $request->file('image');
+            $imageName = time() . "_" . uniqid() . "." . $image->extension();
 
             // Generate thumbnail using the ImageService
-            $imageService->generateThumbnailImage($file, $imageName, 'uploads/categories', 124, 124);
+            $imageService->resizeAndSaveImage($image, $imageName, $this->thumbnailPath, 124, 124);
 
             // Move the original image to the public storage
-            $file->move(public_path('uploads/categories'), $imageName);
+            $image->move(public_path($this->imagePath), $imageName);
 
             $category->image = $imageName;
         }
@@ -133,13 +137,17 @@ class CategoryController extends Controller
             // Delete old image files if they exist (now works because $category is loaded)
             if ($category->image) {
                 @unlink(public_path('uploads/categories/' . $category->image));
-                @unlink(public_path('uploads/categories/thumbnails/' . $category->image));
+                @unlink(public_path($this->thumbnailPath . $category->image));
             }
 
-            $file = $request->file('image');
-            $imageName = time() . "_" . uniqid() . "." . $file->getClientOriginalExtension();
-            $imageService->generateThumbnailImage($file, $imageName, 'uploads/categories', 124, 124);
-            $file->move(public_path('uploads/categories'), $imageName);
+            $image = $request->file('image');
+            $imageName = time() . "_" . uniqid() . "." . $image->extension();
+
+            // Generate thumbnail using the ImageService
+            $imageService->resizeAndSaveImage($image, $imageName, $this->thumbnailPath, 124, 124);
+
+            // Move the original image to the public storage
+            $image->move(public_path($this->imagePath), $imageName);
 
             $category->image = $imageName;
         }
@@ -159,7 +167,7 @@ class CategoryController extends Controller
 
         if ($category->image) {
             @unlink(public_path('uploads/categories/' . $category->image));
-            @unlink(public_path('uploads/categories/thumbnails/' . $category->image));
+            @unlink(public_path($this->thumbnailPath . $category->image));
         }
 
         $category->delete();

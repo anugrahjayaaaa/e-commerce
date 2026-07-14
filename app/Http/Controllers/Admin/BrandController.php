@@ -13,11 +13,14 @@ class BrandController extends Controller
 {
 
     protected ImageService $imageService;
+    protected String $imagePath, $thumbnailPath;
 
     // Auto inject by Laravel for image service
     public function __construct(ImageService $imageService)
     {
         $this->imageService = $imageService;
+        $this->imagePath = "uploads/brands/";
+        $this->thumbnailPath = $this->imagePath . "thumbnails/";
     }
 
     /**
@@ -69,14 +72,14 @@ class BrandController extends Controller
 
         // Handle image upload if present
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $imageName = time() . "_" . uniqid() . "." . $file->getClientOriginalExtension();
+            $image = $request->file('image');
+            $imageName = time() . "_" . uniqid() . "." . $image->extension();
 
             // Generate thumbnail using the ImageService
-            $imageService->generateThumbnailImage($file, $imageName, 'uploads/brands', 124, 124);
+            $imageService->resizeAndSaveImage($image, $imageName, $this->thumbnailPath, 124, 124);
 
             // Move the original image to the public storage
-            $file->move(public_path('uploads/brands'), $imageName);
+            $image->move(public_path('uploads/brands'), $imageName);
 
             $brand->image = $imageName;
         }
@@ -126,14 +129,17 @@ class BrandController extends Controller
 
             // Delete old image files if they exist (now works because $brand is loaded)
             if ($brand->image) {
-                @unlink(public_path('uploads/brands/' . $brand->image));
-                @unlink(public_path('uploads/brands/thumbnails/' . $brand->image));
+                @unlink(public_path($this->imagePath . $brand->image));
+                @unlink(public_path($this->thumbnailPath . $brand->image));
             }
 
-            $file = $request->file('image');
-            $imageName = time() . "_" . uniqid() . "." . $file->getClientOriginalExtension();
-            $imageService->generateThumbnailImage($file, $imageName, 'uploads/brands', 124, 124);
-            $file->move(public_path('uploads/brands'), $imageName);
+            $image = $request->file('image');
+            $imageName = time() . "_" . uniqid() . "." . $image->extension();
+
+            // Generate thumbnail using the ImageService
+            $imageService->resizeAndSaveImage($image, $imageName, 'uploads/brands/thumbnails', 124, 124);
+
+            $image->move(public_path('uploads/brands'), $imageName);
 
             $brand->image = $imageName;
         }
@@ -152,8 +158,8 @@ class BrandController extends Controller
         $brand = Brand::findOrFail($id);
 
         if ($brand->image) {
-            @unlink(public_path('uploads/brands/' . $brand->image));
-            @unlink(public_path('uploads/brands/thumbnails/' . $brand->image));
+            @unlink(public_path($this->imagePath . $brand->image));
+            @unlink(public_path($this->thumbnailPath . $brand->image));
         }
 
         $brand->delete();

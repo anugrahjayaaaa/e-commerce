@@ -9,17 +9,19 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\ImageService;
-use Carbon\Carbon;
 
 class ProductController extends Controller
 {
 
     protected ImageService $imageService;
+    protected String $imagePath, $thumbnailPath;
 
     // Auto inject by Laravel for image service
     public function __construct(ImageService $imageService)
     {
         $this->imageService = $imageService;
+        $this->imagePath = "uploads/products/";
+        $this->thumbnailPath = $this->imagePath . "thumbnails/";
     }
 
     /**
@@ -65,15 +67,14 @@ class ProductController extends Controller
         $product->brand_id = $validatedData['brand_id'];
         $product->category_id = $validatedData['category_id'];
 
-        $current_time = Carbon::now()->timespan();
-
         // Handle image upload if present
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $imageName = $current_time . "." . $image->extension();
+            $imageName = time() . "_" . uniqid() . "." . $image->extension();
 
-            $imageService->resizeAndSaveImage($image, $imageName, 'uploads/products', 507, 604);
-            $imageService->resizeAndSaveImage($image, $imageName, 'uploads/products/thumbnails', 270, 303);
+            $imageService->resizeAndSaveImage($image, $imageName, $this->imagePath, 507, 604);
+            // thumbnails
+            $imageService->resizeAndSaveImage($image, $imageName, $this->thumbnailPath, 270, 303);
 
             $product->image = $imageName;
         }
@@ -92,10 +93,11 @@ class ProductController extends Controller
                 $gcheck = in_array($gextension, $allowedfileExtion);
 
                 if ($gcheck) {
-                    $gimageName = $current_time . "-" . $counter . "." . $gextension;
+                    $gimageName = time() . "_" . uniqid() . "-" . $counter . "." . $gextension;
 
-                    $imageService->resizeAndSaveImage($file, $gimageName, 'uploads/products', 570, 604);
-                    $imageService->resizeAndSaveImage($file, $gimageName, 'uploads/products/thumbnails', 270, 303);
+                    $imageService->resizeAndSaveImage($file, $gimageName, $this->imagePath, 570, 604);
+                    // thumbnails
+                    $imageService->resizeAndSaveImage($file, $gimageName, $this->thumbnailPath, 270, 303);
 
                     array_push($gallery_arr, $gimageName);
                     $counter = $counter + 1;
@@ -158,21 +160,18 @@ class ProductController extends Controller
         $product->brand_id = $validatedData['brand_id'];
         $product->category_id = $validatedData['category_id'];
 
-        $current_time = time();
-
         // Handle image upload if present (Main Image)
         if ($request->hasFile('image')) {
-            // FIXED: Added '/' before the filename to prevent incorrect path concatenation
             if ($product->image) {
                 @unlink(public_path('uploads/products/' . $product->image));
                 @unlink(public_path('uploads/products/thumbnails/' . $product->image));
             }
 
             $image = $request->file('image');
-            $imageName = $current_time . "." . $image->extension();
+            $imageName = time() . "_" . uniqid() . "." . $image->extension();
 
-            $imageService->resizeAndSaveImage($image, $imageName, 'uploads/products', 507, 604);
-            $imageService->resizeAndSaveImage($image, $imageName, 'uploads/products/thumbnails', 270, 303);
+            $imageService->resizeAndSaveImage($image, $imageName, $this->imagePath, 507, 604);
+            $imageService->resizeAndSaveImage($image, $imageName, $this->thumbnailPath, 270, 303);
 
             $product->image = $imageName;
         }
@@ -227,10 +226,10 @@ class ProductController extends Controller
 
                 if ($gcheck) {
                     // Using uniqid() ensures the filename is completely unique and won't overwrite older files with the same counter
-                    $gimageName = $current_time . "-" . $counter . "-" . uniqid() . "." . $gextension;
+                    $gimageName = time() . "-" . uniqid() . "-" . $counter . "." . $gextension;
 
-                    $imageService->resizeAndSaveImage($file, $gimageName, 'uploads/products', 570, 604);
-                    $imageService->resizeAndSaveImage($file, $gimageName, 'uploads/products/thumbnails', 270, 303);
+                    $imageService->resizeAndSaveImage($file, $gimageName, $this->imagePath, 570, 604);
+                    $imageService->resizeAndSaveImage($file, $gimageName, $this->thumbnailPath, 270, 303);
 
                     // Push the new filename into the updated gallery array
                     array_push($current_gallery, $gimageName);
