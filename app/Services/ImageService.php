@@ -18,4 +18,17 @@ class ImageService
             ->resize($witdh, $height)
             ->save($thumnailPath . "/" . $imageName);
     }
+
+    public function resizeAndSaveImage($image, $imageName, $folder, $witdh = 270, $height = 303)
+    {
+        $imagePath = public_path($folder);
+        if (!file_exists($imagePath)) {
+            mkdir($imagePath, 0755, true);
+        }
+
+        // resize image
+        Image::decode($image)
+            ->resize($witdh, $height)
+            ->save($imagePath . "/" . $imageName);
+    }
 }

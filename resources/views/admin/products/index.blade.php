@@ -51,6 +51,11 @@
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            @if (session('success'))
+                <div class="px-6 py-4 bg-green-100 text-green-700 text-sm rounded-tl-xl rounded-tr-xl">
+                    {{ session('success') }}
+                </div>
+            @endif
             <div class="overflow-x-auto">
                 <table class="w-full text-left whitespace-nowrap">
                     <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
@@ -77,11 +82,11 @@
                                 {{-- name --}}
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <img src="{{ publid_path('uploads/products/thumbnails/') . $product->image }}"
+                                        <img src="{{ asset('uploads/products/thumbnails/' . $product->image) }}"
                                             class="w-12 h-12 rounded object-cover border" alt="{{ $product->name }}">
                                         <div>
                                             <p class="font-semibold text-gray-800 text-sm">{{ $product->name }}</p>
-                                            <p class="text-xs text-gray-500">SKU: {{ $product->sku }}</p>
+                                            <p class="text-xs text-gray-500">SKU: {{ $product->SKU }}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -90,16 +95,16 @@
                                 {{-- category --}}
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $product->category->name }}</td>
                                 {{-- price --}}
-                                @if ($product->sale_price)
-                                    <span
-                                        class="line-through text-gray-400 mr-2">${{ number_format($product->regular_price, 2) }}
-                                    </span>
-                                    <span class="text-primary">${{ number_format($product->sale_price, 2) }}</span>
-                                @else
-                                    <span class="text-gray-800">${{ number_format($product->regular_price, 2) }}</span>
-                                @endif
                                 <td class="px-6 py-4 text-sm font-medium text-gray-800">
-                                    $140.00
+                                    @if ($product->sale_price)
+                                        <span
+                                            class="line-through text-gray-400 mr-2">${{ number_format($product->regular_price, 2) }}
+                                        </span>
+                                        <span class="text-primary">${{ number_format($product->sale_price, 2) }}</span>
+                                    @else
+                                        <span
+                                            class="text-gray-800">${{ number_format($product->regular_price, 2) }}</span>
+                                    @endif
                                 </td>
                                 {{-- stock --}}
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $product->quantity }}</td>
@@ -118,7 +123,7 @@
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
                                         {{-- edit --}}
-                                        <a href="{{ route('admin.products.edit', $category) }}"
+                                        <a href="{{ route('admin.products.edit', $product) }}"
                                             class="w-8 h-8 rounded-full hover:bg-gray-100 text-blue-500 transition flex items-center justify-center"
                                             title="Edit">
                                             <i class="fa-solid fa-pen-to-square"></i>
