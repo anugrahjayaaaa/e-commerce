@@ -69,7 +69,7 @@
                             </div>
                         </div>
                     </div>
-
+                    {{-- price and inventory --}}
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Pricing & Inventory</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -131,7 +131,7 @@
                         </div>
                     </div>
                 </div>
-
+                {{-- publish --}}
                 <div class="space-y-6">
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Publish</h3>
@@ -160,14 +160,14 @@
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
-                            {{-- save button --}}
+                            {{-- save btn --}}
                             <button type="submit"
                                 class="w-full bg-primary hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-medium transition mt-4 shadow">
                                 Save Product
                             </button>
                         </div>
                     </div>
-
+                    {{-- organization --}}
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Organization</h3>
                         <div class="space-y-4">
@@ -207,25 +207,26 @@
                     </div>
 
                     {{-- main image --}}
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100" data-upload-group="product">
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Product Image (Main)</h3>
 
-                        <label for="product-image" id="single-upload-label"
+                        <label for="upload-image" id="single-upload-label" data-upload="content"
                             class="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition cursor-pointer">
                             <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-2"></i>
                             <p class="text-sm text-gray-500">Click to upload main image</p>
-                            <input type="file" id="product-image" name="image" class="hidden"
+                            <input type="file" id="upload-image" data-upload="input" name="image" class="hidden"
                                 accept="image/png, image/jpeg, image/jpg, image/webp">
                         </label>
                         @error('image')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
 
-                        <div id="single-preview-container"
+                        <div id="single-preview-container" data-upload="container"
                             class="hidden mt-4 relative h-48 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden group shadow-sm">
-                            <img id="single-image-preview" src=""
+                            <img id="single-image-preview" src="" data-upload="preview"
                                 class="max-w-full max-h-full object-contain">
-                            <button type="button" id="remove-single-image"
+                            {{-- remove btn --}}
+                            <button type="button" id="remove-single-image" data-upload="remove"
                                 class="absolute top-2 right-2 bg-red-500 text-white rounded-md w-7 h-7 flex items-center justify-center text-sm shadow-md hover:bg-red-600 transition focus:outline-none">
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
@@ -262,6 +263,7 @@
     <!-- Main Content End -->
 
     {{-- custom scripts --}}
-    @include('admin.partials.script-product')
+    @include('admin.partials.scripts.slug-generator')
+    @include('admin.partials.scripts.image-upload')
 
 </x-admin-layout>
