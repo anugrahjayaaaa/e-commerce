@@ -47,7 +47,8 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return view('admin.categories.create');
+        $parentCategories = Category::where('parent_id', null)->orderBy('name', 'ASC')->get();
+        return view('admin.categories.create', compact('parentCategories'));
     }
 
     /**
@@ -59,6 +60,7 @@ class CategoryController extends Controller
         $validatedData = $request->validated();
 
         $category = new Category();
+        $category->parent_id = $validatedData['parent_id'];
         $category->name = $validatedData['name'];
 
         // Generate slug from the provided input or fallback to name
@@ -101,7 +103,11 @@ class CategoryController extends Controller
     public function edit(string $id)
     {
         $category = Category::findOrFail($id);
-        return view('admin.categories.edit', compact('category'));
+        $parentCategories = Category::where('parent_id', null)
+            ->where('id', '!=', $category->id)
+            ->orderBy('name', 'ASC')->get();
+
+        return view('admin.categories.edit', compact('category', 'parentCategories'));
     }
 
     /**
@@ -113,6 +119,7 @@ class CategoryController extends Controller
 
         // Retrieve the validated input data
         $validatedData = $request->validated();
+        $category->parent_id = $validatedData['parent_id'];
         $category->name = $validatedData['name'];
 
         // Generate slug from the provided input or fallback to name
