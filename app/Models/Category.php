@@ -30,4 +30,9 @@ class Category extends Model
         // Add ->with('children') here for eager loading nested categories
         return $this->hasMany(Category::class, 'parent_id');
     }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

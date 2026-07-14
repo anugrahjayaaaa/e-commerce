@@ -8,5 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable(['name', 'slug', 'image', 'status'])]
 class Brand extends Model
 {
-    //
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }
