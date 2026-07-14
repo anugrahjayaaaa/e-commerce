@@ -82,8 +82,16 @@
                                 {{-- name --}}
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <img src="{{ asset('uploads/products/thumbnails/' . $product->image) }}"
-                                            class="w-12 h-12 rounded object-cover border" alt="{{ $product->name }}">
+                                        @if (!empty($product->image))
+                                            <img src="{{ asset('uploads/products/thumbnails/' . $product->image) }}"
+                                                class="w-12 h-12 rounded object-cover border"
+                                                alt="{{ $product->name }}">
+                                        @else
+                                            <div
+                                                class="w-12 h-12 rounded bg-gray-100 border flex items-center justify-center text-gray-400">
+                                                <i class="fa-solid fa-image text-lg"></i>
+                                            </div>
+                                        @endif
                                         <div>
                                             <p class="font-semibold text-gray-800 text-sm">{{ $product->name }}</p>
                                             <p class="text-xs text-gray-500">SKU: {{ $product->SKU }}</p>
