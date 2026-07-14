@@ -161,7 +161,7 @@ class ImageService
         }
     }
 
-    public function resizeAndSaveImage($image, $imageName, $folder, $width, $height)
+    private function resizeAndSaveImage($image, $imageName, $folder, $width, $height)
     {
         $savePath = public_path($folder);
 
