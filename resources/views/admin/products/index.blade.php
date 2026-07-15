@@ -118,12 +118,24 @@
                                     <input type="checkbox" id="select-all"
                                         class="rounded border-gray-300 text-primary focus:ring-primary">
                                 </th>
-                                <th class="px-6 py-4">Product Name</th>
-                                <th class="px-6 py-4">Brand</th>
-                                <th class="px-6 py-4">Category</th>
-                                <th class="px-6 py-4">Price</th>
-                                <th class="px-6 py-4">Stock</th>
-                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="name" label="Product Name" />
+                                </th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="brand" label="Brand" />
+                                </th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="category" label="Category" />
+                                </th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="regular_price" label="Price" />
+                                </th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="quantity" label="Stock" />
+                                </th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="status" label="Status" />
+                                </th>
                                 <th class="px-6 py-4 text-right">Action</th>
                             </tr>
                         </thead>
@@ -149,7 +161,8 @@
                                                 </div>
                                             @endif
                                             <div>
-                                                <p class="font-semibold text-gray-800 text-sm">{{ $product->name }}</p>
+                                                <p class="font-semibold text-gray-800 text-sm">{{ $product->name }}
+                                                </p>
                                                 <p class="text-xs text-gray-500">SKU: {{ $product->SKU }}</p>
                                             </div>
                                         </div>
