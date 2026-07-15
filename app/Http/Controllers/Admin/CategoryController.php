@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Category\StoreCategoryRequest;
 use App\Http\Requests\Admin\Category\UpdateCategoryRequest;
+use App\Http\Requests\Admin\GeneralBulkDeleteRequest;
 use App\Models\Category;
 use App\Services\ImageService;
 use App\Traits\HandlesModelImages; // Use the general trait
@@ -153,5 +154,21 @@ class CategoryController extends Controller
         $category->delete();
 
         return redirect()->route('admin.categories.index')->with('success', 'Category deleted successfully!');
+    }
+
+    /**
+     * Remove multiple specified resources from storage at once.
+     */
+    public function bulkDestroy(GeneralBulkDeleteRequest $request)
+    {
+        $validatedData = $request->validated();
+        $categories = Category::whereIn('id', $validatedData['ids'])->get();
+
+        foreach ($categories as $category) {
+            $this->deleteModelImages($category);
+            $category->delete();
+        }
+
+        return redirect()->route('admin.categories.index')->with('success', 'Categories deleted successfully!');
     }
 }
