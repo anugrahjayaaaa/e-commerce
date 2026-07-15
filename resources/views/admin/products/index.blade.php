@@ -131,7 +131,7 @@
                                     <x-sort-link column="regular_price" label="Price" />
                                 </th>
                                 <th class="px-6 py-4">
-                                    <x-sort-link column="quantity" label="Stock" />
+                                    <x-sort-link column="quantity" label="Quantity" />
                                 </th>
                                 <th class="px-6 py-4">
                                     <x-sort-link column="status" label="Status" />
