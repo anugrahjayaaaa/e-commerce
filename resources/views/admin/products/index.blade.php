@@ -186,7 +186,7 @@
                                                 class="text-gray-800">${{ number_format($product->regular_price, 2) }}</span>
                                         @endif
                                     </td>
-                                    {{-- stock --}}
+                                    {{-- quantity --}}
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $product->quantity }}</td>
                                     {{-- status --}}
                                     <td class="px-6 py-4">

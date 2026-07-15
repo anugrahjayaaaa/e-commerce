@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\GeneralBulkDeleteRequest;
 use App\Models\Brand;
 use App\Services\ImageService;
 use App\Traits\HandlesModelImages; // Use the general trait
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class BrandController extends Controller
@@ -36,22 +37,38 @@ class BrandController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $query = Brand::query();
+        // Start query with products_count to allow sorting by product count
+        $query = Brand::query()->withCount('products');
 
-        $search = request('search');
-        $status = request('status');
+        $search = $request->input('search');
+        $status = $request->input('status');
 
+        // Get sorting parameters
+        $sortBy = $request->input('sort_by', 'id');
+        $sortOrder = $request->input('sort_order', 'desc');
+
+        // Apply Search Filter
         if ($search) {
             $query->where('name', 'LIKE', "%{$search}%");
         }
 
-        if (request()->filled('status')) {
+        // Apply Status Filter
+        if ($request->filled('status')) {
             $query->where('status', $status);
         }
 
-        $brands = $query->orderBy('id', 'DESC')->paginate(10)->withQueryString();
+        // Apply Sorting Logic
+        // Define allowed columns to prevent SQL injection
+        $allowedSortColumns = ['id', 'name', 'slug', 'status', 'products_count'];
+        $sortBy = in_array($sortBy, $allowedSortColumns) ? $sortBy : 'id';
+        $sortOrder = in_array($sortOrder, ['asc', 'desc']) ? $sortOrder : 'desc';
+
+        $query->orderBy($sortBy, $sortOrder);
+
+        // Paginate results
+        $brands = $query->paginate(10)->withQueryString();
 
         return view('admin.brands.index', compact('brands'));
     }
