@@ -12,12 +12,15 @@ use Illuminate\Support\Str;
 class BrandController extends Controller
 {
 
-    protected $imageService;
+    protected ImageService $imageService;
+    protected String $imagePath, $thumbnailPath;
 
     // Auto inject by Laravel for image service
     public function __construct(ImageService $imageService)
     {
         $this->imageService = $imageService;
+        $this->imagePath = "uploads/brands/";
+        $this->thumbnailPath = $this->imagePath . "thumbnails/";
     }
 
     /**
@@ -31,7 +34,7 @@ class BrandController extends Controller
         $status = request('status');
 
         if ($search) {
-            $query->where('name', 'LIKE', "{$search}");
+            $query->where('name', 'LIKE', "%{$search}%");
         }
 
         if (request()->filled('status')) {
@@ -69,16 +72,14 @@ class BrandController extends Controller
 
         // Handle image upload if present
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $imageName = time() . "_" . uniqid() . "." . $file->getClientOriginalExtension();
-
-            // Generate thumbnail using the ImageService
-            $imageService->generateThumbnailImage($file, $imageName, 'uploads/brands', 124, 124);
-
-            // Move the original image to the public storage
-            $file->move(public_path('uploads/brands'), $imageName);
-
-            $brand->image = $imageName;
+            $brand->image = $imageService->uploadAndProcessImage(
+                $request->file('image'),
+                public_path('uploads/brands'),            // Main directory (stores raw file)
+                false,                                    // Do not resize the main image
+                null,                                     // Dimensions not required
+                $this->thumbnailPath,                     // Thumbnail directory
+                ['w' => 124, 'h' => 124]                  // Thumbnail dimensions
+            );
         }
 
         $brand->save();
@@ -121,21 +122,17 @@ class BrandController extends Controller
         // Set status: 1 if active, 0 otherwise
         $brand->status = $request->has('status') ? 1 : 0;
 
-        // Handle image upload if present
+        // Handle image update if a new file is uploaded
         if ($request->hasFile('image')) {
-
-            // Delete old image files if they exist (now works because $brand is loaded)
-            if ($brand->image) {
-                @unlink(public_path('uploads/brands/' . $brand->image));
-                @unlink(public_path('uploads/brands/thumbnails/' . $brand->image));
-            }
-
-            $file = $request->file('image');
-            $imageName = time() . "_" . uniqid() . "." . $file->getClientOriginalExtension();
-            $imageService->generateThumbnailImage($file, $imageName, 'uploads/brands', 124, 124);
-            $file->move(public_path('uploads/brands'), $imageName);
-
-            $brand->image = $imageName;
+            $brand->image = $imageService->uploadAndProcessImage(
+                $request->file('image'),
+                'uploads/brands',                         // Main directory path
+                false,                                    // Do not resize the main image
+                null,                                     // Dimensions not required
+                $this->thumbnailPath,                     // Thumbnail directory path
+                ['w' => 124, 'h' => 124],                 // Thumbnail dimensions
+                $brand->image                             // Pass the old image name to delete it
+            );
         }
 
         $brand->save();
@@ -147,13 +144,17 @@ class BrandController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id, ImageService $imageService)
     {
         $brand = Brand::findOrFail($id);
 
+        // Delete the main image and its thumbnail if they exist
         if ($brand->image) {
-            @unlink(public_path('uploads/brands/' . $brand->image));
-            @unlink(public_path('uploads/brands/thumbnails/' . $brand->image));
+            $imageService->deleteSingleImage(
+                $brand->image,
+                $this->imagePath,
+                $this->thumbnailPath
+            );
         }
 
         $brand->delete();

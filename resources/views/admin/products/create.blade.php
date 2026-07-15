@@ -32,7 +32,7 @@
                             </div>
                             {{-- slug --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Slug</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Product Slug *</label>
                                 <input type="text" name="slug" id="slug" name="slug"
                                     value="{{ old('slug') }}" placeholder="e.g. modern-sofa"
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-gray-50">
@@ -60,7 +60,7 @@
                             </div>
                             {{-- descrpition --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
                                 <textarea id="description" name="description" rows="18" placeholder="Detailed description..."
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm">{{ old('description') }}</textarea>
                                 @error('description')
@@ -69,13 +69,13 @@
                             </div>
                         </div>
                     </div>
-
+                    {{-- price and inventory --}}
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Pricing & Inventory</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {{-- regular price --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Regular Price ($)</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Regular Price ($) *</label>
                                 <input type="number" id="regular_price" name="regular_price"
                                     value="{{ old('regular_price') }}" placeholder="0.00"
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary text-sm">
@@ -95,7 +95,7 @@
                             </div>
                             {{-- SKU --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">SKU *</label>
                                 <input type="text" id="SKU" name="SKU" value="{{ old('SKU') }}"
                                     placeholder="Product SKU"
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary text-sm">
@@ -105,7 +105,7 @@
                             </div>
                             {{-- stock status --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Stock Status</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Stock Status *</label>
                                 <select id="stock_status" name="stock_status" value=" {{ old('stock_status') }}"
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary text-sm bg-white">
                                     <option value="instock" {{ old('stock_status') == 'instock' ? 'selected' : '' }}>In
@@ -120,7 +120,7 @@
                             </div>
                             {{-- quantity --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Quantity *</label>
                                 <input type="number" id="quantity" name="quantity" value="{{ old('quantity') }}"
                                     placeholder="Total items"
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary text-sm">
@@ -131,7 +131,7 @@
                         </div>
                     </div>
                 </div>
-
+                {{-- publish --}}
                 <div class="space-y-6">
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Publish</h3>
@@ -151,7 +151,7 @@
                             {{-- featured --}}
                             <div class="flex items-center gap-2 pt-2">
                                 <input type="checkbox" id="featured" name="featured" value="1"
-                                    {{ old('featured') ? 'checked   ' : ' ' }}
+                                    {{ old('featured') == '1' || old('featured') === true ? 'checked' : '' }}
                                     class="rounded border-gray-300 text-primary focus:ring-primary">
                                 <label for="featured" class="text-sm text-gray-700 cursor-pointer">
                                     This is a featured product
@@ -160,14 +160,14 @@
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
-                            {{-- save button --}}
+                            {{-- save btn --}}
                             <button type="submit"
                                 class="w-full bg-primary hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-medium transition mt-4 shadow">
                                 Save Product
                             </button>
                         </div>
                     </div>
-
+                    {{-- organization --}}
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Organization</h3>
                         <div class="space-y-4">
@@ -207,25 +207,26 @@
                     </div>
 
                     {{-- main image --}}
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100" data-upload-group="product">
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Product Image (Main)</h3>
 
-                        <label for="product-image" id="single-upload-label"
+                        <label for="upload-image" id="single-upload-label" data-upload="content"
                             class="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition cursor-pointer">
                             <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-2"></i>
                             <p class="text-sm text-gray-500">Click to upload main image</p>
-                            <input type="file" id="product-image" name="image" class="hidden"
-                                accept="image/png, image/jpeg, image/jpg, image/webp">
+                            <input type="file" id="upload-image" data-upload="input" name="image"
+                                class="hidden" accept="image/png, image/jpeg, image/jpg, image/webp">
                         </label>
                         @error('image')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
 
-                        <div id="single-preview-container"
+                        <div id="single-preview-container" data-upload="container"
                             class="hidden mt-4 relative h-48 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden group shadow-sm">
-                            <img id="single-image-preview" src=""
+                            <img id="single-image-preview" src="" data-upload="preview"
                                 class="max-w-full max-h-full object-contain">
-                            <button type="button" id="remove-single-image"
+                            {{-- remove btn --}}
+                            <button type="button" id="remove-single-image" data-upload="remove"
                                 class="absolute top-2 right-2 bg-red-500 text-white rounded-md w-7 h-7 flex items-center justify-center text-sm shadow-md hover:bg-red-600 transition focus:outline-none">
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
@@ -236,11 +237,11 @@
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Product Gallery Images</h3>
 
-                        <label for="product-images"
+                        <label for="upload-images"
                             class="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition cursor-pointer">
                             <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-400 mb-2"></i>
                             <p class="text-sm text-gray-500">Click to upload multiple gallery images</p>
-                            <input type="file" id="product-images" name="images[]" class="hidden" multiple
+                            <input type="file" id="upload-images" name="images[]" class="hidden" multiple
                                 accept="image/png, image/jpeg, image/jpg, image/webp">
                         </label>
                         @if ($errors->has('images') || $errors->has('images.*'))
@@ -253,15 +254,15 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </form>
-
     </main>
 
     <!-- Main Content End -->
 
     {{-- custom scripts --}}
-    @include('admin.partials.script-product')
+    @include('admin.partials.scripts.slug-generator')
+    @include('admin.partials.scripts.image-upload')
+    @include('admin.partials.scripts.images-upload')
 
 </x-admin-layout>

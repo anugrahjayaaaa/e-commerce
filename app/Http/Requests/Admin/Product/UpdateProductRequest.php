@@ -16,6 +16,13 @@ class UpdateProductRequest extends FormRequest
         return Auth::user()->utype == "ADM";
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'featured' => $this->has('featured') ? 1 : 0,
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
