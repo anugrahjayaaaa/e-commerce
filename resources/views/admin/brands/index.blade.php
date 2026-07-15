@@ -72,12 +72,22 @@
                                     <input type="checkbox" id="select-all"
                                         class="rounded border-gray-300 text-primary focus:ring-primary">
                                 </th>
-                                <th class="px-6 py-4">ID</th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="id" label="ID" />
+                                </th>
                                 <th class="px-6 py-4">Logo</th>
-                                <th class="px-6 py-4">Brand Name</th>
-                                <th class="px-6 py-4">Slug</th>
-                                <th class="px-6 py-4">Products</th>
-                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="name" label="Brand Name" />
+                                </th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="slug" label="Slug" />
+                                </th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="products_count" label="Products" />
+                                </th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="status" label="Status" />
+                                </th>
                                 <th class="px-6 py-4 text-right">Action</th>
                             </tr>
                         </thead>
