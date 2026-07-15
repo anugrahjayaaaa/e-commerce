@@ -59,58 +59,76 @@ trait HandlesModelImages
     }
 
     /**
-     * Handle gallery images upload and item deletions for any model.
-     *
-     * @param Request $request
-     * @param object $model
-     * @param string $fieldName The database column name for the gallery
-     * @return string|null
+     * Handles the upload and deletion logic for gallery images.
+     * 
+     * @param Request $request - The incoming HTTP request.
+     * @param object $model - The Eloquent model being updated.
+     * @param string $fieldName - The database column name storing the images.
+     * @returns string|null A comma-separated string of valid filenames, or null if empty.
      */
     protected function handleGalleryImageUpload(Request $request, object $model, string $fieldName = 'images'): ?string
     {
         $this->validateImageServiceRequirements();
 
-        $val = $model->$fieldName;
-        $currentGallery = is_array($val) ? $val : (!empty($val) ? explode(',', $val) : []);
+        // 1. Safe Initialization: Ensures compatibility regardless of whether the model casts the field as an array or a string.
+        $fieldValue = $model->$fieldName;
+        $currentGallery = is_array($fieldValue) ? $fieldValue : (!empty($fieldValue) ? explode(',', $fieldValue) : []);
 
-        $thumbPath = property_exists($this, 'thumbnailPath') ? $this->thumbnailPath : ''; // Fallback to empty string for safety
+        $thumbPath = property_exists($this, 'thumbnailPath') ? $this->thumbnailPath : '';
 
-        // Step 1: Handle requested gallery image deletions
+        // ---------------------------------------------------------
+        // 2. Handle Gallery Deletions
+        // ---------------------------------------------------------
         if ($request->has('deleted_gallery_images')) {
             $deletedImages = (array) $request->input('deleted_gallery_images');
 
-            // Only attempt to delete images that actually exist in the current gallery array
+            // Intersection ensures we only delete images that actually belong to this model, preventing arbitrary file deletion attacks.
             $validDeletions = array_intersect($deletedImages, $currentGallery);
 
             if (!empty($validDeletions)) {
                 $this->imageService->deleteGalleryImages($validDeletions, $this->mainPath, $thumbPath);
-
-                // Remove the deleted images from our tracking array
                 $currentGallery = array_diff($currentGallery, $validDeletions);
             }
         }
 
-        // Step 2: Handle new gallery image uploads
+        // ---------------------------------------------------------
+        // 3. Handle New Uploads
+        // ---------------------------------------------------------
         if ($request->hasFile($fieldName)) {
             $galleryFiles = $request->file($fieldName);
 
-            $galleryDims = property_exists($this, 'galleryDimensions') ? $this->galleryDimensions : ['w' => 500, 'h' => 500];
-            $thumbDims = property_exists($this, 'thumbDimensions') ? $this->thumbDimensions : ['w' => 250, 'h' => 250];
+            // Defensive check: Ensure we actually received an array of files before processing.
+            if (is_array($galleryFiles)) {
+                $galleryDims = property_exists($this, 'galleryDimensions') ? $this->galleryDimensions : ['w' => 500, 'h' => 500];
+                $thumbDims = property_exists($this, 'thumbDimensions') ? $this->thumbDimensions : ['w' => 250, 'h' => 250];
 
-            // Process and append new images to the existing gallery array
-            $currentGallery = $this->imageService->processGalleryImages(
-                $galleryFiles,
-                $this->mainPath,
-                $galleryDims,
-                $thumbPath,
-                $thumbDims,
-                $currentGallery
-            );
+                $currentGallery = $this->imageService->processGalleryImages(
+                    $galleryFiles,
+                    $this->mainPath,
+                    $galleryDims,
+                    $thumbPath,
+                    $thumbDims,
+                    $currentGallery
+                );
+            }
         }
 
-        // Re-index array keys cleanly and convert to comma-separated string
-        $currentGallery = array_values($currentGallery);
-        return !empty($currentGallery) ? implode(',', $currentGallery) : null;
+        // ---------------------------------------------------------
+        // 4. Data Sanitization
+        // ---------------------------------------------------------
+
+        // HACK: Strip out any raw UploadedFile objects or temporary server paths that might have leaked from the ImageService.
+        // This prevents database corruption where temporary paths (e.g., /private/var/tmp) are saved instead of actual filenames.
+        $sanitizedGallery = array_filter($currentGallery, function ($item) {
+            return is_string($item)
+                && !str_starts_with($item, '/private/var/tmp')
+                && !str_starts_with($item, '/tmp');
+        });
+
+        // Re-index array keys cleanly to avoid index gaps before imploding to a string.
+        $sanitizedGallery = array_values($sanitizedGallery);
+
+        return !empty($sanitizedGallery) ? implode(',', $sanitizedGallery) : null;
     }
 
     /**
