@@ -82,16 +82,25 @@
                     <!-- Submit button kept hidden for UI cleanliness, triggered via 'Enter' key -->
                     <button type="submit" class="hidden">Apply</button>
                 </form>
+                {{-- buttons --}}
+                <div class="flex gap-2">
+                    {{-- print --}}
+                    <button type="button" onclick="printElement('printable-area')"
+                        class="border border-gray-300 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-print"></i> Print
+                    </button>
+                    {{-- export --}}
+                    <button type="button"
+                        class="border border-gray-300 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-export"></i> Export
+                    </button>
+                </div>
 
-                <button
-                    class="border border-gray-300 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-file-export"></i> Export
-                </button>
             </div>
 
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div id="printable-area" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <form id="bulk-action-form" method="POST" action="{{ route('admin.products.bulk-destroy') }}">
                 @csrf
                 @method('DELETE')
@@ -237,4 +246,7 @@
 
     {{-- bulk delete --}}
     @include('admin.partials.scripts.bulk-delete')
+
+    {{-- print area --}}
+    @include('admin.partials.scripts.print-utility')
 </x-admin-layout>
