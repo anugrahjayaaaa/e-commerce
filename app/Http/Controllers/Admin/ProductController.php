@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\Admin\Product\ProductExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\GeneralBulkDeleteRequest;
 use App\Http\Requests\Admin\Product\StoreProductRequest;
@@ -10,7 +11,9 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\ImageService;
-use App\Traits\HandlesModelImages; // Updated Trait Name
+use App\Traits\HandlesModelImages;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
@@ -39,13 +42,68 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with(['brand', 'category'])->orderBy('created_at', 'DESC')->paginate(10);
+        // Start with a base query and eager load relationships
+        $query = Product::with(['brand', 'category']);
 
-        return view('admin.products.index', compact('products'));
+        // Get input parameters
+        $search = $request->input('search');
+        $category_id = $request->input('category');
+        $brand_id = $request->input('brand');
+        $status = $request->input('status');
+        $sortBy = $request->input('sort_by', 'created_at'); // Default sort
+        $sortOrder = $request->input('sort_order', 'desc'); // Default order
+
+        // Apply Search Filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('SKU', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Apply Category Filter
+        if ($request->filled('category')) {
+            $query->where('category_id', $category_id);
+        }
+
+        // Apply Brand Filter
+        if ($request->filled('brand')) {
+            $query->where('brand_id', $brand_id);
+        }
+
+        // Apply Status Filter
+        if ($request->filled('status')) {
+            $query->where('status', $status);
+        }
+
+        // Apply Sorting Logic
+        // We use leftJoin for relations to allow sorting by related names
+        if ($sortBy === 'brand') {
+            $query->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
+                ->select('products.*', 'brands.name as brand_name')
+                ->orderBy('brands.name', $sortOrder);
+        } elseif ($sortBy === 'category') {
+            $query->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+                ->select('products.*', 'categories.name as category_name')
+                ->orderBy('categories.name', $sortOrder);
+        } else {
+            // Sort by direct columns
+            // Validate column to prevent SQL injection (optional but recommended)
+            $allowedSortColumns = ['name', 'regular_price', 'stock_status', 'status', 'created_at'];
+            $sortBy = in_array($sortBy, $allowedSortColumns) ? $sortBy : 'created_at';
+            $query->orderBy($sortBy, $sortOrder);
+        }
+
+        // Execute pagination
+        $products = $query->paginate(10)->withQueryString();
+
+        $brands = Brand::select(['id', 'name'])->orderBy('name')->get();
+        $categories = Category::select(['id', 'name'])->orderBy('name')->get();
+
+        return view('admin.products.index', compact('brands', 'categories', 'products'));
     }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -146,5 +204,13 @@ class ProductController extends Controller
         }
 
         return redirect()->route('admin.products.index')->with('success', 'Products deleted successfully!');
+    }
+
+    public function export()
+    {
+        // Generate the filename with the current date (Format: YYYY-MM-DD)
+        $fileName = date('Y-m-d') . '-products.xlsx';
+
+        return Excel::download(new ProductExport, $fileName);
     }
 }

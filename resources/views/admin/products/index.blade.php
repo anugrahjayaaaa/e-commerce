@@ -22,42 +22,85 @@
         </div>
 
         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
+
             <div class="flex flex-col md:flex-row gap-4 justify-between">
-                <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-                    <div class="relative w-full md:w-64">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                            <i class="fa-solid fa-search text-gray-400"></i>
-                        </span>
-                        <input type="text"
-                            class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                            placeholder="Search product name...">
+                <form action="{{ route('admin.products.index') }}" method="GET"
+                    class="flex flex-col md:flex-row gap-4 justify-between">
+
+                    <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                        <!-- Search Input: Added quotes for value attribute to prevent parsing errors -->
+                        <div class="relative w-full md:w-64">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                <i class="fa-solid fa-search text-gray-400"></i>
+                            </span>
+                            <input type="text" name="search" value="{{ request('search') }}"
+                                onkeypress="if(event.key==='enter') this.form.submit()"
+                                class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                placeholder="Search product...">
+                        </div>
+
+                        <!-- Category Dropdown: Using request() helper for persistent state -->
+                        <select name="category" onchange="this.form.submit()"
+                            class="w-full md:w-48 border px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-primary bg-white text-gray-600">
+                            <option value="">All Categories</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}" @selected(request('category') == $category->id)>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <!-- Brand Dropdown: Using request() helper for persistent state -->
+                        <select name="brand" onchange="this.form.submit()"
+                            class="w-full md:w-48 border px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-primary bg-white text-gray-600">
+                            <option value="">All Brands</option>
+                            @foreach ($brands as $brand)
+                                <option value="{{ $brand->id }}" @selected(request('brand') == $brand->id)>
+                                    {{ $brand->name }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <!-- Status Dropdown: Added logic to persist selection state -->
+                        <select name="status" onchange="this.form.submit()"
+                            class="w-full md:w-40 border px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-primary bg-white text-gray-600">
+                            <option value="">All Status</option>
+                            <option value="0" @selected(request('status') == '0')>Draft</option>
+                            <option value="1" @selected(request('status') == '1 ')>Published</option>
+                        </select>
+
+                        <!-- Clear Filters Button -->
+                        @if (request()->hasAny(['search', 'category', 'brand', 'status']))
+                            <a href="{{ route('admin.products.index') }}"
+                                class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors duration-200">
+                                <i class="fa-solid fa-xmark text-xs"></i>
+                                <span>Clear</span>
+                            </a>
+                        @endif
                     </div>
 
-                    <select
-                        class="w-full md:w-48 border px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-primary bg-white text-gray-600">
-                        <option value="">All Categories</option>
-                        <option value="furniture">Furniture</option>
-                        <option value="decor">Decor</option>
-                        <option value="lighting">Lighting</option>
-                    </select>
-
-                    <select
-                        class="w-full md:w-40 border px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-primary bg-white text-gray-600">
-                        <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="draft">Draft</option>
-                        <option value="out">Out of Stock</option>
-                    </select>
+                    <!-- Submit button kept hidden for UI cleanliness, triggered via 'Enter' key -->
+                    <button type="submit" class="hidden">Apply</button>
+                </form>
+                {{-- buttons --}}
+                <div class="flex gap-2">
+                    {{-- print --}}
+                    <button type="button" onclick="printElement('printable-area')"
+                        class="border border-gray-300 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-print"></i> Print
+                    </button>
+                    {{-- export --}}
+                    <a href="{{ route('admin.products.export') }}"
+                        class="border border-gray-300 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-export"></i> Export
+                    </a>
                 </div>
 
-                <button
-                    class="border border-gray-300 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-file-export"></i> Export
-                </button>
             </div>
+
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div id="printable-area" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <form id="bulk-action-form" method="POST" action="{{ route('admin.products.bulk-destroy') }}">
                 @csrf
                 @method('DELETE')
@@ -75,12 +118,24 @@
                                     <input type="checkbox" id="select-all"
                                         class="rounded border-gray-300 text-primary focus:ring-primary">
                                 </th>
-                                <th class="px-6 py-4">Product Name</th>
-                                <th class="px-6 py-4">Brand</th>
-                                <th class="px-6 py-4">Category</th>
-                                <th class="px-6 py-4">Price</th>
-                                <th class="px-6 py-4">Stock</th>
-                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="name" label="Product Name" />
+                                </th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="brand" label="Brand" />
+                                </th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="category" label="Category" />
+                                </th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="regular_price" label="Price" />
+                                </th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="quantity" label="Quantity" />
+                                </th>
+                                <th class="px-6 py-4">
+                                    <x-sort-link column="status" label="Status" />
+                                </th>
                                 <th class="px-6 py-4 text-right">Action</th>
                             </tr>
                         </thead>
@@ -106,7 +161,8 @@
                                                 </div>
                                             @endif
                                             <div>
-                                                <p class="font-semibold text-gray-800 text-sm">{{ $product->name }}</p>
+                                                <p class="font-semibold text-gray-800 text-sm">{{ $product->name }}
+                                                </p>
                                                 <p class="text-xs text-gray-500">SKU: {{ $product->SKU }}</p>
                                             </div>
                                         </div>
@@ -134,14 +190,17 @@
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $product->quantity }}</td>
                                     {{-- status --}}
                                     <td class="px-6 py-4">
-                                        <span
-                                            class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold">
-                                            @if ($product->status)
+                                        @if ($product->status)
+                                            <span
+                                                class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold">
                                                 Published
-                                            @else
+                                            </span>
+                                        @else
+                                            <span
+                                                class="bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full text-xs font-semibold">
                                                 Draft
-                                            @endif
-                                        </span>
+                                            </span>
+                                        @endif
                                     </td>
                                     {{-- actions --}}
                                     <td class="px-6 py-4 text-right">
@@ -200,4 +259,7 @@
 
     {{-- bulk delete --}}
     @include('admin.partials.scripts.bulk-delete')
+
+    {{-- print area --}}
+    @include('admin.partials.scripts.print-utility')
 </x-admin-layout>
