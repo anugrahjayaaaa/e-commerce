@@ -250,11 +250,13 @@
                                 <div
                                     class="existing-image-wrapper relative group h-24 bg-gray-100 rounded border overflow-hidden">
                                     <img src="{{ asset('uploads/products/thumbnails/' . $product->image) }}"
-                                        class="w-full h-full object-cover">
-                                    <div class="remove-existing-btn absolute inset-0 bg-black bg-opacity-50 hidden group-hover:flex items-center justify-center cursor-pointer text-white transition-opacity"
+                                        class="w-full h-full object-cover" alt="{{ $product->name }}">
+                                    <!-- UPDATED: Changed div to button, added js-remove-existing-btn -->
+                                    <button type="button"
+                                        class="js-remove-existing-btn absolute inset-0 w-full h-full bg-black bg-opacity-50 hidden group-hover:flex items-center justify-center cursor-pointer text-white transition-opacity border-0 focus:outline-none"
                                         data-input-name="deleted_main_image" data-image="{{ $product->image }}">
                                         <i class="fa-solid fa-trash pointer-events-none"></i>
-                                    </div>
+                                    </button>
                                 </div>
                             @else
                                 <div
@@ -291,13 +293,16 @@
                                 @foreach (explode(',', $product->images) as $img)
                                     <div
                                         class="existing-image-wrapper relative group h-20 bg-gray-100 rounded border overflow-hidden">
-                                        <img src="{{ asset('uploads/products/' . $img) }}"
-                                            class="w-full h-full object-cover">
-                                        <div class="remove-existing-btn absolute inset-0 bg-black bg-opacity-50 hidden group-hover:flex items-center justify-center cursor-pointer text-white transition-opacity"
+                                        <img src="{{ asset('uploads/products/thumbnails/' . $img) }}"
+                                            class="w-full h-full object-cover"
+                                            alt="{{ $product->name . '-' . $loop->iteration }}">
+                                        <!-- UPDATED: Changed div to button, added js-remove-existing-btn -->
+                                        <button type="button"
+                                            class="js-remove-existing-btn absolute inset-0 w-full h-full bg-black bg-opacity-50 hidden group-hover:flex items-center justify-center cursor-pointer text-white transition-opacity border-0 focus:outline-none"
                                             data-input-name="deleted_gallery_images[]"
                                             data-image="{{ $img }}">
                                             <i class="fa-solid fa-trash pointer-events-none"></i>
-                                        </div>
+                                        </button>
                                     </div>
                                 @endforeach
                             @else
@@ -310,10 +315,10 @@
                         </div>
                     </div>
 
+                    {{-- Hidden container for the backend tracker --}}
                     <div id="deleted-existing-images-container" class="hidden"></div>
-                </div>
 
-            </div>
+                </div>
         </form>
 
     </main>

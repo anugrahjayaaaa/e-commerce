@@ -3,25 +3,37 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\GeneralBulkDeleteRequest;
 use App\Http\Requests\Admin\Product\StoreProductRequest;
 use App\Http\Requests\Admin\Product\UpdateProductRequest;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\ImageService;
+use App\Traits\HandlesModelImages; // Updated Trait Name
 
 class ProductController extends Controller
 {
+    use HandlesModelImages; // Implement the general trait
 
+    // Required properties for the HandlesModelImages trait contract
     protected ImageService $imageService;
-    protected String $imagePath, $thumbnailPath;
+    protected string $mainPath;
 
-    // Auto inject by Laravel for image service
+    // Optional properties used by the trait dynamically
+    protected string $thumbnailPath;
+    protected array $mainDimensions = ['w' => 507, 'h' => 604];
+    protected array $galleryDimensions = ['w' => 570, 'h' => 604];
+    protected array $thumbDimensions = ['w' => 270, 'h' => 303];
+
+    /**
+     * Constructor: Auto-inject ImageService and set upload paths.
+     */
     public function __construct(ImageService $imageService)
     {
         $this->imageService = $imageService;
-        $this->imagePath = "uploads/products/";
-        $this->thumbnailPath = $this->imagePath . "thumbnails/";
+        $this->mainPath = "uploads/products/";
+        $this->thumbnailPath = $this->mainPath . "thumbnails/";
     }
 
     /**
@@ -29,7 +41,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with('brand', 'category')->orderBy('created_at', 'DESC')->paginate(10);
+        $products = Product::with(['brand', 'category'])->orderBy('created_at', 'DESC')->paginate(10);
+
         return view('admin.products.index', compact('products'));
     }
 
@@ -47,67 +60,21 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreProductRequest $request, ImageService $imageService)
+    public function store(StoreProductRequest $request)
     {
         $validatedData = $request->validated();
 
-        $product = new Product();
-        $product->name = $validatedData['name'];
-        $product->slug = $validatedData['slug'];
-        $product->short_description = $validatedData['short_description'];
-        $product->information = $validatedData['information'];
-        $product->description = $validatedData['description'];
-        $product->regular_price = $validatedData['regular_price'];
-        $product->sale_price = $validatedData['sale_price'];
-        $product->SKU = $validatedData['SKU'];
-        $product->stock_status = $validatedData['stock_status'];
-        $product->featured = $validatedData['featured'];
-        $product->status = $validatedData['status'];
-        $product->quantity = $validatedData['quantity'];
-        $product->brand_id = $validatedData['brand_id'];
-        $product->category_id = $validatedData['category_id'];
+        // Map validated request data into the Product model instance
+        $product = new Product($validatedData);
 
-        // Handle image upload if present
-        if ($request->hasFile('image')) {
-            $product->image = $imageService->uploadAndProcessImage(
-                $request->file('image'),
-                $this->imagePath,                         // Main directory (stores resized file)
-                true,                                     // Resize the main image instead of moving raw file
-                ['w' => 507, 'h' => 604],                 // Main image dimensions
-                $this->thumbnailPath,                     // Thumbnail directory
-                ['w' => 270, 'h' => 303]                  // Thumbnail dimensions
-            );
-        }
-
-        // Handle product gallery images upload if present
-        if ($request->hasFile('images')) {
-            $galleryFiles = $request->file('images');
-
-            // Process the new gallery uploads via ImageService
-            $galleryArray = $imageService->processGalleryImages(
-                $galleryFiles,
-                $this->imagePath,
-                ['w' => 570, 'h' => 604],
-                $this->thumbnailPath,
-                ['w' => 270, 'h' => 303]
-            );
-
-            // Save comma-separated string to the database
-            $product->images = !empty($galleryArray) ? implode(',', $galleryArray) : null;
-        }
+        // Process images dynamically using the trait. 
+        // We pass 'true' to ensure the main image is resized.
+        $product->image = $this->handleSingleImageUpload($request, $product, 'image', true);
+        $product->images = $this->handleGalleryImageUpload($request, $product, 'images');
 
         $product->save();
 
-        // Redirect to the index page with a success message
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully!');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
     }
 
     /**
@@ -115,7 +82,6 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-
         $product = Product::findOrFail($id);
         $brands = Brand::select(['id', 'name'])->orderBy('name')->get();
         $categories = Category::select(['id', 'name'])->orderBy('name')->get();
@@ -126,137 +92,59 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProductRequest $request, string $id, ImageService $imageService)
+    public function update(UpdateProductRequest $request, string $id)
     {
         $validatedData = $request->validated();
-
         $product = Product::findOrFail($id);
 
-        $product->name = $validatedData['name'];
-        $product->slug = $validatedData['slug'];
-        $product->short_description = $validatedData['short_description'];
-        $product->information = $validatedData['information'];
-        $product->description = $validatedData['description'];
-        $product->regular_price = $validatedData['regular_price'];
-        $product->sale_price = $validatedData['sale_price'];
-        $product->SKU = $validatedData['SKU'];
-        $product->stock_status = $validatedData['stock_status'];
-        $product->featured = $validatedData['featured'];
-        $product->status = $validatedData['status'];
-        $product->quantity = $validatedData['quantity'];
-        $product->brand_id = $validatedData['brand_id'];
-        $product->category_id = $validatedData['category_id'];
+        // Update textual data
+        $product->fill($validatedData);
 
-        // Handle image update if a new file is uploaded
-        if ($request->hasFile('image')) {
-            $product->image = $imageService->uploadAndProcessImage(
-                $request->file('image'),
-                $this->imagePath,                         // Main directory path
-                true,                                     // Resize the main image instead of moving raw file
-                ['w' => 507, 'h' => 604],                 // Main image dimensions
-                $this->thumbnailPath,                     // Thumbnail directory path
-                ['w' => 270, 'h' => 303],                 // Thumbnail dimensions
-                $product->image                           // Pass the old image name to delete it
-            );
-        }
-
-        // Optional: Handle case where user explicitly deletes the Main Image via the trash button (without uploading a new one)
+        // Handle explicit removal of the main image via the UI trash button
         if ($request->has('deleted_main_image') && !$request->hasFile('image')) {
-            if ($product->image) {
-                // Remove both main and thumbnail files physically using the service
-                $imageService->deleteSingleImage(
-                    $product->image,
-                    $this->imagePath,
-                    $this->thumbnailPath
-                );
-            }
-
-            // Clear the column record in the database
+            $this->deleteSingleModelImage($product);
             $product->image = null;
+        } else {
+            // Handle normal single image upload/update
+            $product->image = $this->handleSingleImageUpload($request, $product, 'image', true);
         }
 
-        // ==========================================
-        // HANDLE IMAGES UPLOAD (GALLERY) FOR UPDATE
-        // ==========================================
-
-        // Convert current gallery images from database into an array format
-        $currentGallery = $product->images ? explode(',', $product->images) : [];
-
-        // Step 1: Handle requested image deletions
-        if ($request->has('deleted_gallery_images')) {
-            $deletedImages = (array) $request->input('deleted_gallery_images');
-
-            // Filter to ensure we only attempt to delete images that actually exist in the gallery records
-            $validDeletions = array_intersect($deletedImages, $currentGallery);
-
-            if (!empty($validDeletions)) {
-                // Remove files physically from storage using service
-                $imageService->deleteGalleryImages($validDeletions, $this->imagePath, $this->thumbnailPath);
-
-                // Remove the deleted filenames from the database tracking queue
-                $currentGallery = array_diff($currentGallery, $validDeletions);
-            }
-        }
-
-        // Step 2: Handle new image uploads for the gallery
-        if ($request->hasFile('images')) {
-            $newGalleryFiles = $request->file('images');
-
-            // Process and append new images to the existing gallery array
-            $currentGallery = $imageService->processGalleryImages(
-                $newGalleryFiles,
-                $this->imagePath,
-                ['w' => 570, 'h' => 604],
-                $this->thumbnailPath,
-                ['w' => 270, 'h' => 303],
-                $currentGallery // Pass the existing remaining images to maintain index tracking
-            );
-        }
-
-        // Step 3: Sync and update database record
-        $currentGallery = array_values($currentGallery); // Re-index array keys cleanly
-        $product->images = !empty($currentGallery) ? implode(',', $currentGallery) : null;
+        // Handle gallery synchronization (removals and new additions)
+        $product->images = $this->handleGalleryImageUpload($request, $product, 'images');
 
         $product->save();
 
-        // Redirect to the index page with a success message
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id, ImageService $imageService)
+    public function destroy(string $id)
     {
         $product = Product::findOrFail($id);
 
-        // 1. Delete the main product image and its thumbnail
-        if ($product->image) {
-            $imageService->deleteSingleImage(
-                $product->image,
-                $this->imagePath,
-                $this->thumbnailPath
-            );
-        }
+        // Wipe all associated physical files safely
+        $this->deleteModelImages($product);
 
-        // 2. Delete all product gallery images and their thumbnails
-        if ($product->images) {
-            // Convert the comma-separated string from database into an array
-            $galleryImages = explode(',', $product->images);
-
-            // Pass the array straight to the service for bulk deletion
-            $imageService->deleteGalleryImages(
-                $galleryImages,
-                $this->imagePath,
-                $this->thumbnailPath
-            );
-        }
-
-        // 3. Delete the product record from the database
         $product->delete();
 
-        // Redirect to the index page with a success message
-        // Note: Fixed the success message from 'Brand...' to 'Product deleted successfully!'
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
+    }
+
+    /**
+     * Remove multiple specified resources from storage at once.
+     */
+    public function bulkDestroy(GeneralBulkDeleteRequest $request)
+    {
+        $validatedData = $request->validated();
+        $products = Product::whereIn('id', $validatedData['ids'])->get();
+
+        foreach ($products as $product) {
+            $this->deleteModelImages($product);
+            $product->delete();
+        }
+
+        return redirect()->route('admin.products.index')->with('success', 'Products deleted successfully!');
     }
 }

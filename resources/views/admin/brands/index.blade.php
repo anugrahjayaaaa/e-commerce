@@ -8,10 +8,17 @@
                 <h1 class="text-2xl font-bold text-gray-800">Brands</h1>
                 <p class="text-sm text-gray-500">Manage product brands and partners</p>
             </div>
-            <a href="{{ route('admin.brands.create') }}"
-                class="bg-primary hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
-                <i class="fa-solid fa-plus"></i> Add New Brand
-            </a>
+            <div class="flex gap-3">
+                <button type="button" id="bulk-delete-btn"
+                    class="hidden bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition flex -item-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-trash"></i> Deleted Selected (<span id="selected-count">0</span>)
+                </button>
+
+                <a href="{{ route('admin.brands.create') }}"
+                    class="bg-primary hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-plus"></i> Add New Brand
+                </a>
+            </div>
         </div>
 
         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
@@ -47,104 +54,120 @@
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            @if (session('success'))
-                <div class="px-6 py-4 bg-green-100 text-green-700 text-sm rounded-tl-xl rounded-tr-xl">
-                    {{ session('success') }}
-                </div>
-            @endif
+            <form id="bulk-action-form" method="POST" action="{{ route('admin.brands.bulk-destroy') }}">
+                @csrf
+                @method('DELETE')
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left whitespace-nowrap">
-                    <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
-                        <tr>
-                            <th class="px-6 py-4">ID</th>
-                            <th class="px-6 py-4">Logo</th>
-                            <th class="px-6 py-4">Brand Name</th>
-                            <th class="px-6 py-4">Slug</th>
-                            <th class="px-6 py-4">Products</th>
-                            <th class="px-6 py-4">Status</th>
-                            <th class="px-6 py-4 text-right">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @forelse ($brands as $brand)
-                            <tr class="hover:bg-gray-50 transition">
-                                {{-- id --}}
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ $brand->id }}</td>
-                                {{-- logo --}}
-                                <td class="px-6 py-4">
-                                    <div
-                                        class="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center border">
-                                        <img src="{{ asset('uploads/brands/thumbnails') }}/{{ $brand->image }}"
-                                            class="max-w-[30px] max-h-[30px] object-contain" alt="{{ $brand->name }}"
-                                            onerror="this.src='https://placehold.co/40x40?text=B'">
-                                    </div>
-                                </td>
-                                {{-- name --}}
-                                <td class="px-6 py-4">
-                                    <span class="font-semibold text-gray-800">{{ $brand->name }}</span>
-                                </td>
-                                {{-- slug --}}
-                                <td class="px-6 py-4 text-sm text-gray-600">{{ $brand->slug }}</td>
-                                {{-- products --}}
-                                <td class="px-6 py-4">
-                                    <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
-                                        0</span>
-                                </td>
-                                {{-- status --}}
-                                <td class="px-6 py-4">
-                                    @if ($brand->status)
-                                        <span
-                                            class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold">
-                                            Active
-                                        </span>
-                                    @else
-                                        <span
-                                            class="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-semibold">
-                                            Inactive
-                                        </span>
-                                    @endif
+                @if (session('success'))
+                    <div class="px-6 py-4 bg-green-100 text-green-700 text-sm rounded-tl-xl rounded-tr-xl">
+                        {{ session('success') }}
+                    </div>
+                @endif
 
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <a href="{{ route('admin.brands.edit', $brand) }}"
-                                            class="w-8 h-8 rounded-full hover:bg-gray-100 text-blue-500 transition flex items-center justify-center"
-                                            title="Edit">
-                                            <i class="fa-solid fa-pen-to-square"></i>
-                                        </a>
-                                        {{-- delete --}}
-                                        <button type="button"
-                                            class="w-8 h-8 rounded-full hover:bg-gray-100 text-red-500 transition flex items-center justify-center"
-                                            onclick="openDeleteModal('{{ $brand->name }}', '{{ route('admin.brands.destroy', $brand) }}', 'brand')"
-                                            title="Delete">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            {{-- if $brands empty --}}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center justify-center text-gray-500">
-                                        <i class="fa-solid fa-boxes-stacked text-4xl mb-3 text-gray-300"></i>
-                                        <h3 class="text-lg font-medium text-gray-900">Brands not available</h3>
-                                        <p class="text-sm mt-1">You haven't added any brands to your store yet.</p>
-                                        <a href="{{ route('admin.brands.create') }}"
-                                            class="mt-4 text-primary hover:underline text-sm font-medium">
-                                            Add your first brand
-                                        </a>
-                                    </div>
-                                </td>
+                                <th class="px-6 py-4">
+                                    <input type="checkbox" id="select-all"
+                                        class="rounded border-gray-300 text-primary focus:ring-primary">
+                                </th>
+                                <th class="px-6 py-4">ID</th>
+                                <th class="px-6 py-4">Logo</th>
+                                <th class="px-6 py-4">Brand Name</th>
+                                <th class="px-6 py-4">Slug</th>
+                                <th class="px-6 py-4">Products</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4 text-right">Action</th>
                             </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @forelse ($brands as $brand)
+                                <tr class="hover:bg-gray-50 transition">
+                                    {{-- checkbox --}}
+                                    <td class="px-6 py-4">
+                                        <input type="checkbox" name="ids[]" value={{ $brand->id }}
+                                            class="checkbox rounded border-gray-300 text-primary focus:ring-primary">
+                                    </td>
+                                    {{-- id --}}
+                                    <td class="px-6 py-4 text-sm text-gray-500">{{ $brand->id }}</td>
+                                    {{-- logo --}}
+                                    <td class="px-6 py-4">
+                                        <div
+                                            class="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center border">
+                                            <img src="{{ asset('uploads/brands/thumbnails') }}/{{ $brand->image }}"
+                                                class="max-w-[30px] max-h-[30px] object-contain"
+                                                alt="{{ $brand->name }}"
+                                                onerror="this.src='https://placehold.co/40x40?text=B'">
+                                        </div>
+                                    </td>
+                                    {{-- name --}}
+                                    <td class="px-6 py-4">
+                                        <span class="font-semibold text-gray-800">{{ $brand->name }}</span>
+                                    </td>
+                                    {{-- slug --}}
+                                    <td class="px-6 py-4 text-sm text-gray-600">{{ $brand->slug }}</td>
+                                    {{-- products --}}
+                                    <td class="px-6 py-4">
+                                        <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
+                                            0</span>
+                                    </td>
+                                    {{-- status --}}
+                                    <td class="px-6 py-4">
+                                        @if ($brand->status)
+                                            <span
+                                                class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold">
+                                                Active
+                                            </span>
+                                        @else
+                                            <span
+                                                class="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-semibold">
+                                                Inactive
+                                            </span>
+                                        @endif
 
-            <div>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <a href="{{ route('admin.brands.edit', $brand) }}"
+                                                class="w-8 h-8 rounded-full hover:bg-gray-100 text-blue-500 transition flex items-center justify-center"
+                                                title="Edit">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </a>
+                                            {{-- delete --}}
+                                            <button type="button"
+                                                class="js-delete-trigger w-8 h-8 rounded-full hover:bg-gray-100 text-red-500 transition flex items-center justify-center"
+                                                data-name="{{ $brand->name }}"
+                                                data-url="{{ route('admin.brands.destroy', $brand) }}"
+                                                data-type="brand" title="Delete">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                {{-- if $brands empty --}}
+                                <tr>
+                                    <td colspan="7" class="px-6 py-12 text-center">
+                                        <div class="flex flex-col items-center justify-center text-gray-500">
+                                            <i class="fa-solid fa-boxes-stacked text-4xl mb-3 text-gray-300"></i>
+                                            <h3 class="text-lg font-medium text-gray-900">Brands not available</h3>
+                                            <p class="text-sm mt-1">You haven't added any brands to your store yet.</p>
+                                            <a href="{{ route('admin.brands.create') }}"
+                                                class="mt-4 text-primary hover:underline text-sm font-medium">
+                                                Add your first brand
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+
+            <div
+                class="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                 {{-- pagination --}}
                 {{ $brands->links() }}
             </div>
@@ -155,4 +178,7 @@
 
     {{-- custom script delete modal --}}
     @include('admin.partials..scripts.delete-modal')
+
+    {{-- bulk delete --}}
+    @include('admin.partials.scripts.bulk-delete')
 </x-admin-layout>
