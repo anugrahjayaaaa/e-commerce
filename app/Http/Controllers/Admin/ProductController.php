@@ -41,9 +41,39 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with(['brand', 'category'])->orderBy('created_at', 'DESC')->paginate(10);
+        $query = Product::with(['brand', 'category']);
 
-        return view('admin.products.index', compact('products'));
+        $search = request('search');
+        $category_id = request('category');
+        $brand_id = request('brand');
+        $status = request('status');
+
+
+        if ($search) {
+            $query->where(function($q) use ($query, $search){
+                $q->where('name', 'LIKE', "%{$search}%")
+                ->orWhere('SKU', 'LIKE', "%{$search}%");
+            });
+        }
+
+        if (request()->filled('category')) {
+            $query->where('category_id', $category_id);
+        }
+
+        if (request()->filled('brand')) {
+            $query->where('brand_id', $brand_id);
+        }
+
+        if (request()->filled('status')) {
+            $query->where('status', $status);
+        }
+
+        $products = $query->orderBy('created_at', 'DESC')->paginate(10)->withQueryString();
+
+        $brands = Brand::select(['id', 'name'])->orderBy('name')->get();
+        $categories = Category::select(['id', 'name'])->orderBy('name')->get();
+
+        return view('admin.products.index', compact('brands', 'categories', 'products'));
     }
 
     /**
