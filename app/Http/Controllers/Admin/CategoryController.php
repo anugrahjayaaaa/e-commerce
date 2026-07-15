@@ -7,15 +7,24 @@ use App\Http\Requests\Admin\Category\StoreCategoryRequest;
 use App\Http\Requests\Admin\Category\UpdateCategoryRequest;
 use App\Models\Category;
 use App\Services\ImageService;
+use App\Traits\HandlesModelImages; // Use the general trait
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
+    use HandlesModelImages; // Implement the general trait
+
+    // Required properties for the HandlesModelImages trait contract
     protected ImageService $imageService;
-    protected String $mainPath, $thumbnailPath;
+    protected string $mainPath;
 
+    // Optional properties used by the trait dynamically
+    protected string $thumbnailPath;
+    protected array $thumbDimensions = ['w' => 124, 'h' => 124];
 
-    // Auto inject by Laravel for image service
+    /**
+     * Constructor: Auto-inject ImageService and set upload paths.
+     */
     public function __construct(ImageService $imageService)
     {
         $this->imageService = $imageService;
@@ -42,6 +51,7 @@ class CategoryController extends Controller
         }
 
         $categories = $query->orderBy('id', 'DESC')->paginate(10)->withQueryString();
+
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -50,43 +60,35 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        $parentCategories = Category::where('parent_id', null)->orderBy('name', 'ASC')->get();
+        $parentCategories = Category::whereNull('parent_id')->orderBy('name', 'ASC')->get();
+
         return view('admin.categories.create', compact('parentCategories'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCategoryRequest $request, ImageService $imageService)
+    public function store(StoreCategoryRequest $request)
     {
         // Retrieve the validated input data
         $validatedData = $request->validated();
 
         $category = new Category();
-        $category->parent_id = $validatedData['parent_id'];
+        $category->parent_id = $validatedData['parent_id'] ?? null;
         $category->name = $validatedData['name'];
 
-        // Generate slug from the provided input or fallback to name
+        // Generate slug from the provided input or fallback to the category name
         $category->slug = !empty($request->slug) ? Str::slug($request->slug) : Str::slug($validatedData['name']);
 
         // Set status: 1 if active, 0 otherwise
         $category->status = $request->has('status') ? 1 : 0;
 
-        // Handle image upload if present
-        if ($request->hasFile('image')) {
-            $category->image = $imageService->uploadAndProcessImage(
-                $request->file('image'),
-                public_path($this->mainPath),            // Main directory (stores raw file)
-                false,                                    // Do not resize the main image
-                null,                                     // Dimensions not required
-                $this->thumbnailPath,                     // Thumbnail directory
-                ['w' => 124, 'h' => 124]                  // Thumbnail dimensions
-            );
-        }
+        // Process image upload via Trait wrapper. 
+        // We pass 'false' to keep the original main image size.
+        $category->image = $this->handleSingleImageUpload($request, $category, 'image', false);
 
         $category->save();
 
-        // Redirect to the index page with a success message
         return redirect()->route('admin.categories.index')->with('success', 'Category created successfully!');
     }
 
@@ -104,9 +106,12 @@ class CategoryController extends Controller
     public function edit(string $id)
     {
         $category = Category::findOrFail($id);
-        $parentCategories = Category::where('parent_id', null)
+
+        // Exclude the current category from being its own parent
+        $parentCategories = Category::whereNull('parent_id')
             ->where('id', '!=', $category->id)
-            ->orderBy('name', 'ASC')->get();
+            ->orderBy('name', 'ASC')
+            ->get();
 
         return view('admin.categories.edit', compact('category', 'parentCategories'));
     }
@@ -114,59 +119,39 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCategoryRequest $request, string $id, ImageService $imageService)
+    public function update(UpdateCategoryRequest $request, string $id)
     {
-        $category = category::findOrFail($id);
+        $category = Category::findOrFail($id);
 
         // Retrieve the validated input data
         $validatedData = $request->validated();
-        $category->parent_id = $validatedData['parent_id'];
+
+        $category->parent_id = $validatedData['parent_id'] ?? null;
         $category->name = $validatedData['name'];
-
-        // Generate slug from the provided input or fallback to name
         $category->slug = !empty($request->slug) ? Str::slug($request->slug) : Str::slug($validatedData['name']);
-
-        // Set status: 1 if active, 0 otherwise
         $category->status = $request->has('status') ? 1 : 0;
 
-        // Handle image update if a new file is uploaded
-        if ($request->hasFile('image')) {
-            $category->image = $imageService->uploadAndProcessImage(
-                $request->file('image'),
-                $this->mainPath,                         // Main directory path
-                false,                                    // Do not resize the main image
-                null,                                     // Dimensions not required
-                $this->thumbnailPath,                     // Thumbnail directory path
-                ['w' => 124, 'h' => 124],                 // Thumbnail dimensions
-                $category->image                          // Pass the old image name to delete it
-            );
-        }
+        // Process image update via Trait wrapper.
+        // We pass 'false' to keep the original main image size.
+        $category->image = $this->handleSingleImageUpload($request, $category, 'image', false);
 
         $category->save();
 
-        // Redirect to the index page with a success message
         return redirect()->route('admin.categories.index')->with('success', 'Category updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id, ImageService $imageService)
+    public function destroy(string $id)
     {
         $category = Category::findOrFail($id);
 
-        // Delete the main image and its thumbnail if they exist
-        if ($category->image) {
-            $imageService->deleteSingleImage(
-                $category->image,
-                $this->mainPath,
-                $this->thumbnailPath
-            );
-        }
+        // Safely wipe the physical files linked to the model (Main & Thumbnail)
+        $this->deleteModelImages($category);
 
         $category->delete();
 
-        // Redirect to the index page with a success message
         return redirect()->route('admin.categories.index')->with('success', 'Category deleted successfully!');
     }
 }

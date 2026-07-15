@@ -7,15 +7,24 @@ use App\Http\Requests\Admin\Brand\StoreBrandRequest;
 use App\Http\Requests\Admin\Brand\UpdateBrandRequest;
 use App\Models\Brand;
 use App\Services\ImageService;
+use App\Traits\HandlesModelImages; // Use the general trait
 use Illuminate\Support\Str;
 
 class BrandController extends Controller
 {
+    use HandlesModelImages; // Implement the general trait
 
+    // Required properties for the HandlesModelImages trait contract
     protected ImageService $imageService;
-    protected String $mainPath, $thumbnailPath;
+    protected string $mainPath;
 
-    // Auto inject by Laravel for image service
+    // Optional properties used by the trait dynamically
+    protected string $thumbnailPath;
+    protected array $thumbDimensions = ['w' => 124, 'h' => 124];
+
+    /**
+     * Constructor: Auto-inject ImageService and set upload paths.
+     */
     public function __construct(ImageService $imageService)
     {
         $this->imageService = $imageService;
@@ -42,6 +51,7 @@ class BrandController extends Controller
         }
 
         $brands = $query->orderBy('id', 'DESC')->paginate(10)->withQueryString();
+
         return view('admin.brands.index', compact('brands'));
     }
 
@@ -56,7 +66,7 @@ class BrandController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreBrandRequest $request, ImageService $imageService)
+    public function store(StoreBrandRequest $request)
     {
         // Retrieve the validated input data
         $validatedData = $request->validated();
@@ -64,27 +74,18 @@ class BrandController extends Controller
         $brand = new Brand();
         $brand->name = $validatedData['name'];
 
-        // Generate slug from the provided input or fallback to name
+        // Generate slug from the provided input or fallback to the brand name
         $brand->slug = !empty($request->slug) ? Str::slug($request->slug) : Str::slug($validatedData['name']);
 
         // Set status: 1 if active, 0 otherwise
         $brand->status = $request->has('status') ? 1 : 0;
 
-        // Handle image upload if present
-        if ($request->hasFile('image')) {
-            $brand->image = $imageService->uploadAndProcessImage(
-                $request->file('image'),
-                public_path('uploads/brands'),            // Main directory (stores raw file)
-                false,                                    // Do not resize the main image
-                null,                                     // Dimensions not required
-                $this->thumbnailPath,                     // Thumbnail directory
-                ['w' => 124, 'h' => 124]                  // Thumbnail dimensions
-            );
-        }
+        // Process image upload via Trait wrapper. 
+        // We pass 'false' for the resize parameter to keep the original main image size.
+        $brand->image = $this->handleSingleImageUpload($request, $brand, 'image', false);
 
         $brand->save();
 
-        // Redirect to the index page with a success message
         return redirect()->route('admin.brands.index')->with('success', 'Brand created successfully!');
     }
 
@@ -102,64 +103,45 @@ class BrandController extends Controller
     public function edit(string $id)
     {
         $brand = Brand::findOrFail($id);
+
         return view('admin.brands.edit', compact('brand'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateBrandRequest $request, string $id, ImageService $imageService)
+    public function update(UpdateBrandRequest $request, string $id)
     {
         $brand = Brand::findOrFail($id);
 
         // Retrieve the validated input data
         $validatedData = $request->validated();
+
         $brand->name = $validatedData['name'];
-
-        // Generate slug from the provided input or fallback to name
         $brand->slug = !empty($request->slug) ? Str::slug($request->slug) : Str::slug($validatedData['name']);
-
-        // Set status: 1 if active, 0 otherwise
         $brand->status = $request->has('status') ? 1 : 0;
 
-        // Handle image update if a new file is uploaded
-        if ($request->hasFile('image')) {
-            $brand->image = $imageService->uploadAndProcessImage(
-                $request->file('image'),
-                'uploads/brands',                         // Main directory path
-                false,                                    // Do not resize the main image
-                null,                                     // Dimensions not required
-                $this->thumbnailPath,                     // Thumbnail directory path
-                ['w' => 124, 'h' => 124],                 // Thumbnail dimensions
-                $brand->image                             // Pass the old image name to delete it
-            );
-        }
+        // Process image upload/update via Trait wrapper.
+        // We pass 'false' for the resize parameter to keep the original main image size.
+        $brand->image = $this->handleSingleImageUpload($request, $brand, 'image', false);
 
         $brand->save();
 
-        // Redirect to the index page with a success message
         return redirect()->route('admin.brands.index')->with('success', 'Brand updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id, ImageService $imageService)
+    public function destroy(string $id)
     {
         $brand = Brand::findOrFail($id);
 
-        // Delete the main image and its thumbnail if they exist
-        if ($brand->image) {
-            $imageService->deleteSingleImage(
-                $brand->image,
-                $this->mainPath,
-                $this->thumbnailPath
-            );
-        }
+        // Safely wipe the physical files linked to the model (Main & Thumbnail)
+        $this->deleteModelImages($brand);
 
         $brand->delete();
 
-        // Redirect to the index page with a success message
         return redirect()->route('admin.brands.index')->with('success', 'Brand deleted successfully!');
     }
 }
