@@ -70,7 +70,9 @@ trait HandlesModelImages
     {
         $this->validateImageServiceRequirements();
 
-        $currentGallery = !empty($model->$fieldName) ? explode(',', $model->$fieldName) : [];
+        $val = $model->$fieldName;
+        $currentGallery = is_array($val) ? $val : (!empty($val) ? explode(',', $val) : []);
+
         $thumbPath = property_exists($this, 'thumbnailPath') ? $this->thumbnailPath : ''; // Fallback to empty string for safety
 
         // Step 1: Handle requested gallery image deletions
