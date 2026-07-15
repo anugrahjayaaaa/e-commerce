@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Brand\StoreBrandRequest;
 use App\Http\Requests\Admin\Brand\UpdateBrandRequest;
+use App\Http\Requests\Admin\GeneralBulkDeleteRequest;
 use App\Models\Brand;
 use App\Services\ImageService;
 use App\Traits\HandlesModelImages; // Use the general trait
@@ -143,5 +144,21 @@ class BrandController extends Controller
         $brand->delete();
 
         return redirect()->route('admin.brands.index')->with('success', 'Brand deleted successfully!');
+    }
+
+    /**
+     * Remove multiple specified resources from storage at once.
+     */
+    public function bulkDestroy(GeneralBulkDeleteRequest $request)
+    {
+        $validatedData = $request->validated();
+        $brands = Brand::whereIn('id', $validatedData['ids'])->get();
+
+        foreach ($brands as $brand) {
+            $this->deleteModelImages($brand);
+            $brand->delete();
+        }
+
+        return redirect()->route('admin.brands.index')->with('success', 'Brands deleted successfully!');
     }
 }
