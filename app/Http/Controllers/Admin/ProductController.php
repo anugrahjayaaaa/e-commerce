@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\Admin\Product\ProductExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\GeneralBulkDeleteRequest;
 use App\Http\Requests\Admin\Product\StoreProductRequest;
@@ -10,7 +11,8 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\ImageService;
-use App\Traits\HandlesModelImages; // Updated Trait Name
+use App\Traits\HandlesModelImages;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
@@ -50,9 +52,9 @@ class ProductController extends Controller
 
 
         if ($search) {
-            $query->where(function($q) use ($query, $search){
+            $query->where(function ($q) use ($query, $search) {
                 $q->where('name', 'LIKE', "%{$search}%")
-                ->orWhere('SKU', 'LIKE', "%{$search}%");
+                    ->orWhere('SKU', 'LIKE', "%{$search}%");
             });
         }
 
@@ -176,5 +178,13 @@ class ProductController extends Controller
         }
 
         return redirect()->route('admin.products.index')->with('success', 'Products deleted successfully!');
+    }
+
+    public function export()
+    {
+        // Generate the filename with the current date (Format: YYYY-MM-DD)
+        $fileName = date('Y-m-d') . '-products.xlsx';
+
+        return Excel::download(new ProductExport, $fileName);
     }
 }
