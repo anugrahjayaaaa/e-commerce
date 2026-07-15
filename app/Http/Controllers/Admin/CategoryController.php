@@ -34,7 +34,7 @@ class CategoryController extends Controller
         $status = request('status');
 
         if ($search) {
-            $query->where('name', 'LIKE', "{$search}");
+            $query->where('name', 'LIKE', "%{$search}%");
         }
 
         if (request()->filled('status')) {
