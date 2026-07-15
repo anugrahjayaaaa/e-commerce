@@ -256,7 +256,6 @@ class ProductController extends Controller
         $product->delete();
 
         // Redirect to the index page with a success message
-        // Note: Fixed the success message from 'Brand...' to 'Product deleted successfully!'
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
     }
 }
