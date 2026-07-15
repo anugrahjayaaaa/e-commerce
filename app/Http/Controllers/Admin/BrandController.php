@@ -13,14 +13,14 @@ class BrandController extends Controller
 {
 
     protected ImageService $imageService;
-    protected String $imagePath, $thumbnailPath;
+    protected String $mainPath, $thumbnailPath;
 
     // Auto inject by Laravel for image service
     public function __construct(ImageService $imageService)
     {
         $this->imageService = $imageService;
-        $this->imagePath = "uploads/brands/";
-        $this->thumbnailPath = $this->imagePath . "thumbnails/";
+        $this->mainPath = "uploads/brands/";
+        $this->thumbnailPath = $this->mainPath . "thumbnails/";
     }
 
     /**
@@ -152,7 +152,7 @@ class BrandController extends Controller
         if ($brand->image) {
             $imageService->deleteSingleImage(
                 $brand->image,
-                $this->imagePath,
+                $this->mainPath,
                 $this->thumbnailPath
             );
         }

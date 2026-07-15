@@ -12,15 +12,15 @@ use Illuminate\Support\Str;
 class CategoryController extends Controller
 {
     protected ImageService $imageService;
-    protected String $imagePath, $thumbnailPath;
+    protected String $mainPath, $thumbnailPath;
 
 
     // Auto inject by Laravel for image service
     public function __construct(ImageService $imageService)
     {
         $this->imageService = $imageService;
-        $this->imagePath = "uploads/categories/";
-        $this->thumbnailPath = $this->imagePath . "thumbnails/";
+        $this->mainPath = "uploads/categories/";
+        $this->thumbnailPath = $this->mainPath . "thumbnails/";
     }
 
     /**
@@ -76,7 +76,7 @@ class CategoryController extends Controller
         if ($request->hasFile('image')) {
             $category->image = $imageService->uploadAndProcessImage(
                 $request->file('image'),
-                public_path($this->imagePath),            // Main directory (stores raw file)
+                public_path($this->mainPath),            // Main directory (stores raw file)
                 false,                                    // Do not resize the main image
                 null,                                     // Dimensions not required
                 $this->thumbnailPath,                     // Thumbnail directory
@@ -133,7 +133,7 @@ class CategoryController extends Controller
         if ($request->hasFile('image')) {
             $category->image = $imageService->uploadAndProcessImage(
                 $request->file('image'),
-                $this->imagePath,                         // Main directory path
+                $this->mainPath,                         // Main directory path
                 false,                                    // Do not resize the main image
                 null,                                     // Dimensions not required
                 $this->thumbnailPath,                     // Thumbnail directory path
@@ -159,7 +159,7 @@ class CategoryController extends Controller
         if ($category->image) {
             $imageService->deleteSingleImage(
                 $category->image,
-                $this->imagePath,
+                $this->mainPath,
                 $this->thumbnailPath
             );
         }

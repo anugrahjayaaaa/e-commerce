@@ -14,14 +14,14 @@ class ProductController extends Controller
 {
 
     protected ImageService $imageService;
-    protected String $imagePath, $thumbnailPath;
+    protected String $mainPath, $thumbnailPath;
 
     // Auto inject by Laravel for image service
     public function __construct(ImageService $imageService)
     {
         $this->imageService = $imageService;
-        $this->imagePath = "uploads/products/";
-        $this->thumbnailPath = $this->imagePath . "thumbnails/";
+        $this->mainPath = "uploads/products/";
+        $this->thumbnailPath = $this->mainPath . "thumbnails/";
     }
 
     /**
@@ -71,7 +71,7 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             $product->image = $imageService->uploadAndProcessImage(
                 $request->file('image'),
-                $this->imagePath,                         // Main directory (stores resized file)
+                $this->mainPath,                         // Main directory (stores resized file)
                 true,                                     // Resize the main image instead of moving raw file
                 ['w' => 507, 'h' => 604],                 // Main image dimensions
                 $this->thumbnailPath,                     // Thumbnail directory
@@ -86,7 +86,7 @@ class ProductController extends Controller
             // Process the new gallery uploads via ImageService
             $galleryArray = $imageService->processGalleryImages(
                 $galleryFiles,
-                $this->imagePath,
+                $this->mainPath,
                 ['w' => 570, 'h' => 604],
                 $this->thumbnailPath,
                 ['w' => 270, 'h' => 303]
@@ -151,7 +151,7 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             $product->image = $imageService->uploadAndProcessImage(
                 $request->file('image'),
-                $this->imagePath,                         // Main directory path
+                $this->mainPath,                         // Main directory path
                 true,                                     // Resize the main image instead of moving raw file
                 ['w' => 507, 'h' => 604],                 // Main image dimensions
                 $this->thumbnailPath,                     // Thumbnail directory path
@@ -166,7 +166,7 @@ class ProductController extends Controller
                 // Remove both main and thumbnail files physically using the service
                 $imageService->deleteSingleImage(
                     $product->image,
-                    $this->imagePath,
+                    $this->mainPath,
                     $this->thumbnailPath
                 );
             }
@@ -191,7 +191,7 @@ class ProductController extends Controller
 
             if (!empty($validDeletions)) {
                 // Remove files physically from storage using service
-                $imageService->deleteGalleryImages($validDeletions, $this->imagePath, $this->thumbnailPath);
+                $imageService->deleteGalleryImages($validDeletions, $this->mainPath, $this->thumbnailPath);
 
                 // Remove the deleted filenames from the database tracking queue
                 $currentGallery = array_diff($currentGallery, $validDeletions);
@@ -205,7 +205,7 @@ class ProductController extends Controller
             // Process and append new images to the existing gallery array
             $currentGallery = $imageService->processGalleryImages(
                 $newGalleryFiles,
-                $this->imagePath,
+                $this->mainPath,
                 ['w' => 570, 'h' => 604],
                 $this->thumbnailPath,
                 ['w' => 270, 'h' => 303],
@@ -234,7 +234,7 @@ class ProductController extends Controller
         if ($product->image) {
             $imageService->deleteSingleImage(
                 $product->image,
-                $this->imagePath,
+                $this->mainPath,
                 $this->thumbnailPath
             );
         }
@@ -247,7 +247,7 @@ class ProductController extends Controller
             // Pass the array straight to the service for bulk deletion
             $imageService->deleteGalleryImages(
                 $galleryImages,
-                $this->imagePath,
+                $this->mainPath,
                 $this->thumbnailPath
             );
         }
