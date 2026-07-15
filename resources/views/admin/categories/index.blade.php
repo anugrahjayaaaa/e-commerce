@@ -139,10 +139,11 @@
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
                                         {{-- delete --}}
-                                        <button
-                                            class="w-8 h-8 rounded-full hover:bg-gray-100 text-red-500 transition flex items-center justify-center"
-                                            onclick="openDeleteModal('{{ $category->name }}', '{{ route('admin.categories.destroy', $category) }}', 'category')"
-                                            title="Delete">
+                                        <button type="button"
+                                            class="js-delete-trigger w-8 h-8 rounded-full hover:bg-gray-100 text-red-500 transition flex items-center justify-center"
+                                            data-name="{{ $category->name }}"
+                                            data-url="{{ route('admin.categories.destroy', $category) }}"
+                                            data-type="category" title="Delete">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </div>
