@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\GeneralBulkDeleteRequest;
 use App\Http\Requests\Admin\Product\StoreProductRequest;
 use App\Http\Requests\Admin\Product\UpdateProductRequest;
 use App\Models\Brand;
@@ -257,5 +258,43 @@ class ProductController extends Controller
 
         // Redirect to the index page with a success message
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
+    }
+
+    public function bulkDestroy(GeneralBulkDeleteRequest $request, ImageService $imageService)
+    {
+        $validatedData = $request->validated();
+        $ids = $validatedData['ids'];
+
+        $products = Product::whereIn('id', $ids)->get();
+
+        foreach ($products as $product) {
+            // 1. Delete the main product image and its thumbnail
+            if ($product->image) {
+                $imageService->deleteSingleImage(
+                    $product->image,
+                    $this->mainPath,
+                    $this->thumbnailPath
+                );
+            }
+
+            // 2. Delete all product gallery images and their thumbnails
+            if ($product->images) {
+                // Convert the comma-separated string from database into an array
+                $galleryImages = explode(',', $product->images);
+
+                // Pass the array straight to the service for bulk deletion
+                $imageService->deleteGalleryImages(
+                    $galleryImages,
+                    $this->mainPath,
+                    $this->thumbnailPath
+                );
+            }
+
+            // 3. Delete the product record from the database
+            $product->delete();
+        }
+
+        // Redirect to the index page with a success message
+        return redirect()->route('admin.products.index')->with('success', 'Products deleted successfully!');
     }
 }

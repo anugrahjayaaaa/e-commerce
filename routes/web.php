@@ -40,6 +40,7 @@ Route::middleware([AuthAdmin::class])->prefix('admin')->name('admin.')->group(fu
     Route::resource('categories', CategoryController::class);
 
     // products
+    Route::delete('products/bulk-destroy', [ProductController::class, 'bulkDestroy'])->name('products.bulk-destroy');
     Route::resource('products', ProductController::class);
 });
 
