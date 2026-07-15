@@ -26,7 +26,7 @@
                     </div>
                     {{-- slug --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Brand Slug</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Brand Slug *</label>
                         <input type="text" id="slug" name="slug" placeholder="samsung"
                             value="{{ old('slug') }}"
                             class="w-full border px-4 py-2 rounded-lg bg-gray-50 outline-none">
@@ -37,7 +37,7 @@
                 </div>
                 {{-- image --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Brand Logo *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Brand Logo</label>
                     <div class="relative flex items-center justify-center w-full h-40" data-upload-group="image">
                         <label for="upload-image"
                             class="relative flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden">

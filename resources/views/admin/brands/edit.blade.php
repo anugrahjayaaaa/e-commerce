@@ -25,7 +25,7 @@
                         @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Brand Slug</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Brand Slug *</label>
                         <input type="text" id="slug" name="slug" placeholder="samsung"
                             value="{{ old('slug', $brand->slug) }}"
                             class="w-full border px-4 py-2 rounded-lg bg-gray-50 outline-none">

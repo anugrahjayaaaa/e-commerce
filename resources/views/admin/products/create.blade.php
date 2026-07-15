@@ -32,7 +32,7 @@
                             </div>
                             {{-- slug --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Slug</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Product Slug *</label>
                                 <input type="text" name="slug" id="slug" name="slug"
                                     value="{{ old('slug') }}" placeholder="e.g. modern-sofa"
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-gray-50">
@@ -60,7 +60,7 @@
                             </div>
                             {{-- descrpition --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
                                 <textarea id="description" name="description" rows="18" placeholder="Detailed description..."
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm">{{ old('description') }}</textarea>
                                 @error('description')
@@ -75,7 +75,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {{-- regular price --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Regular Price ($)</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Regular Price ($) *</label>
                                 <input type="number" id="regular_price" name="regular_price"
                                     value="{{ old('regular_price') }}" placeholder="0.00"
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary text-sm">
@@ -95,7 +95,7 @@
                             </div>
                             {{-- SKU --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">SKU *</label>
                                 <input type="text" id="SKU" name="SKU" value="{{ old('SKU') }}"
                                     placeholder="Product SKU"
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary text-sm">
@@ -105,7 +105,7 @@
                             </div>
                             {{-- stock status --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Stock Status</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Stock Status *</label>
                                 <select id="stock_status" name="stock_status" value=" {{ old('stock_status') }}"
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary text-sm bg-white">
                                     <option value="instock" {{ old('stock_status') == 'instock' ? 'selected' : '' }}>In
@@ -120,7 +120,7 @@
                             </div>
                             {{-- quantity --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Quantity *</label>
                                 <input type="number" id="quantity" name="quantity" value="{{ old('quantity') }}"
                                     placeholder="Total items"
                                     class="w-full border px-4 py-2 rounded-lg focus:outline-none focus:border-primary text-sm">
