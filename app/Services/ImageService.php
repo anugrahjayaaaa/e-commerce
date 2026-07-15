@@ -111,25 +111,20 @@ class ImageService
         array $thumbDims,
         array $currentGallery = []
     ): array {
-        $allowedExtensions = ['jpg', 'png', 'jpeg', 'webp'];
         $counter = count($currentGallery) + 1;
 
         foreach ($files as $file) {
-            $extension = $file->getClientOriginalExtension();
+            $extension = $file->extension();
+            $imageName = time() . "_" . uniqid() . "-" . $counter . "." . $extension;
 
-            // Validate file extension
-            if (in_array(strtolower($extension), $allowedExtensions)) {
-                $imageName = time() . "_" . uniqid() . "-" . $counter . "." . $extension;
+            // Process and save main gallery image
+            $this->resizeAndSaveImage($file, $imageName, $mainPath, $mainDims['w'], $mainDims['h']);
 
-                // Process and save main gallery image
-                $this->resizeAndSaveImage($file, $imageName, $mainPath, $mainDims['w'], $mainDims['h']);
+            // Process and save gallery thumbnail
+            $this->resizeAndSaveImage($file, $imageName, $thumbPath, $thumbDims['w'], $thumbDims['h']);
 
-                // Process and save gallery thumbnail
-                $this->resizeAndSaveImage($file, $imageName, $thumbPath, $thumbDims['w'], $thumbDims['h']);
-
-                $currentGallery[] = $imageName;
-                $counter++;
-            }
+            $currentGallery[] = $imageName;
+            $counter++;
         }
 
         return $currentGallery;
