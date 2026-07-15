@@ -34,9 +34,11 @@ Route::middleware([AuthAdmin::class])->prefix('admin')->name('admin.')->group(fu
     Route::get('/', [AdminController::class, 'index'])->name('index');
 
     // brands
+    Route::delete('brands/bulk-destroy', [BrandController::class, 'bulkDestroy'])->name('brands.bulk-destroy');
     Route::resource('brands', BrandController::class);
 
     // categories
+    Route::delete('categories/bulk-destroy', [CategoryController::class, 'bulkDestroy'])->name('categories.bulk-destroy');
     Route::resource('categories', CategoryController::class);
 
     // products
