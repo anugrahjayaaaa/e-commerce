@@ -54,13 +54,14 @@
                             @foreach ($categories as $category)
                                 <li class="flex items-center">
                                     <label class="flex items-center cursor-pointer hover:text-primary">
-                                        <input name="category" type="checkbox" class="custom-checkbox hidden"
-                                            value="{{ $category->id }}"
-                                            {{ request('category') == $category->id ? 'checked' : '' }}>
+                                        <input name="category[]" type="checkbox" value="{{ $category->id }}"
+                                            {{ in_array($category->id, request('category', [])) ? 'checked' : '' }}
+                                            class="peer custom-checkbox hidden filter-checkbox">
                                         <div
-                                            class="w-4 h-4 border border-gray-300 rounded mr-3 flex items-center justify-center bg-white transition">
+                                            class="w-4 h-4 border border-gray-300 rounded mr-3 flex items-center justify-center bg-white transition peer-checked:bg-primary peer-checked:border-primary text-transparent peer-checked:text-white ">
+                                            <i class="fa fa-check text-[10px]"></i>
                                         </div>
-                                        {{ $category->name }}
+                                        {{ $category->name }} ({{ $category->products_count }})
                                     </label>
                                 </li>
                             @endforeach

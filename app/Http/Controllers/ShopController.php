@@ -32,6 +32,11 @@ class ShopController extends Controller
             $query->whereIn('brand_id', $brandIds);
         }
 
+        if ($request->filled('category')) {
+            $categoryIds = $request->input('category', '[]');
+            $query->whereIn('category_id', $categoryIds);
+        }
+
         $products = $query->paginate($perPage)->withQueryString();
 
         $brands = Brand::withCount('products')->orderBy('name', 'asc')->get();
