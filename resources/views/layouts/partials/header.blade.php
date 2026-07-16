@@ -2,7 +2,7 @@
     <div class="container mx-auto py-4">
         <div class="flex justify-between items-center">
             <div class="w-1/4">
-                <a href="index.php">
+                <a href="{{ route('home.index') }}">
                     <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="max-w-[200px]" />
                 </a>
             </div>
@@ -10,8 +10,8 @@
             <div class="w-1/2 flex justify-center">
                 <nav>
                     <ul class="flex space-x-8 font-medium text-gray-700">
-                        <li><a href="index.php" class="hover:text-primary transition">Home</a></li>
-                        <li><a href="shop.php" class="hover:text-primary transition">Shop</a></li>
+                        <li><a href="{{ route('home.index') }}" class="hover:text-primary transition">Home</a></li>
+                        <li><a href="{{ route('shop.index') }}" class="hover:text-primary transition">Shop</a></li>
                         <li><a href="cart.php" class="hover:text-primary transition">Cart</a></li>
                         <li><a href="wishlist.php" class="hover:text-primary transition">Wishlist</a></li>
                         <li><a href="contact.php" class="hover:text-primary transition">Contact</a></li>
@@ -98,7 +98,7 @@
                 <i class="fa-solid fa-bars"></i>
             </button>
 
-            <a href="index.php">
+            <a href="{{ route('home.index') }}">
                 <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="max-w-[120px]" />
             </a>
 
@@ -135,7 +135,7 @@
         </div>
 
         <div class="pb-2">
-            <form action="shop.php" method="GET" class="relative">
+            <form action="{{ route('shop.index') }}" method="GET" class="relative">
                 <input type="text" name="q" placeholder="Search for products..."
                     class="w-full bg-gray-100 border-none px-4 py-2.5 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none">
                 <button type="submit"
@@ -155,8 +155,8 @@
     </div>
     <nav class="p-4">
         <ul class="space-y-4">
-            <li><a href="index.php" class="block hover:text-primary">Home</a></li>
-            <li><a href="shop.php" class="block hover:text-primary">Shop</a></li>
+            <li><a href="{{ route('home.index') }}" class="block hover:text-primary">Home</a></li>
+            <li><a href="{{ route('shop.index') }}" class="block hover:text-primary">Shop</a></li>
             <li><a href="cart.php" class="block hover:text-primary">Cart</a></li>
             <li><a href="wishlist.php" class="block hover:text-primary">Wishlist</a></li>
             <li><a href="contact.php" class="block hover:text-primary">Contact</a></li>
