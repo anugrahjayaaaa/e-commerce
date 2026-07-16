@@ -10,10 +10,23 @@ class ShopController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::where('status', true)
-            ->orderBy('created_at', 'DESC')->paginate(12);
+        $query = Product::query()->where('status', true);
+
+        $sortBy = $request->input('sort_by', 'newest');
+
+        match ($sortBy) {
+            'price_asc' => $query->orderBy('sale_price', 'asc'),
+            'price_desc' => $query->orderBy('sale_price', 'desc'),
+            'featured' => $query->where('featured', true),
+            default => $query->latest()
+        };
+
+        $perPage = $request->input('per_page', 12);
+
+
+        $products = $query->paginate($perPage)->withQueryString();
 
         return view('shop.index', compact('products'));
     }
