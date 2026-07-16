@@ -169,7 +169,7 @@ class BrandController extends Controller
     public function bulkDestroy(GeneralBulkDeleteRequest $request)
     {
         $validatedData = $request->validated();
-        $brands = Brand::whereIn('id', $validatedData['ids'])->get();
+        $brands = Brand::findMany($validatedData['ids']);
 
         foreach ($brands as $brand) {
             $this->deleteModelImages($brand);

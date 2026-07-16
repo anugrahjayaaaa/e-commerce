@@ -196,7 +196,7 @@ class ProductController extends Controller
     public function bulkDestroy(GeneralBulkDeleteRequest $request)
     {
         $validatedData = $request->validated();
-        $products = Product::whereIn('id', $validatedData['ids'])->get();
+        $products = Product::findMany($validatedData['ids']);
 
         foreach ($products as $product) {
             $this->deleteModelImages($product);

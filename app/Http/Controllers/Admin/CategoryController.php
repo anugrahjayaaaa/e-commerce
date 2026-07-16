@@ -179,7 +179,7 @@ class CategoryController extends Controller
     public function bulkDestroy(GeneralBulkDeleteRequest $request)
     {
         $validatedData = $request->validated();
-        $categories = Category::whereIn('id', $validatedData['ids'])->get();
+        $categories = Category::findMany($validatedData['ids']);
 
         foreach ($categories as $category) {
             $this->deleteModelImages($category);
