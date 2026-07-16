@@ -20,12 +20,26 @@
         <form id="form-filter" method="GET" action="{{ route('shop.index') }}">
             <div class="flex flex-col lg:flex-row gap-8">
                 <aside class="w-full lg:w-1/4 order-2 lg:order-1 space-y-8">
+                    {{-- clear filter --}}
+                    @if (request()->anyFilled(['search', 'brand', 'category', 'min_price', 'max_price', 'sort_by', 'per_page']))
+                        <div class="mt-3 flex items-center justify-between animate-fade-in">
+                            <span class="text-xs font-medium text-gray-400">Filters are active</span>
+                            <a href="{{ route('shop.index') }}"
+                                class="inline-flex items-center space-x-1 text-xs font-semibold text-red-500 hover:text-red-600 transition-colors">
+                                <i class="fa-solid fa-xmark"></i>
+                                <span>Clear All Filters</span>
+                            </a>
+                        </div>
+                    @endif
+                    {{-- search --}}
                     <div class="bg-gray-50 p-6 rounded-lg border">
                         <form class="relative">
-                            <input type="text" placeholder="Search product..."
+                            <input name="search" value="{{ request('search') }}" type="text"
+                                placeholder="Search product..."
                                 class="w-full border p-3 rounded focus:outline-none focus:border-primary pr-10">
-                            <button class="absolute right-3 top-3 text-gray-400 hover:text-primary"><i
-                                    class="fa fa-search"></i></button>
+                            <button type="button" class="absolute right-3 top-3 text-gray-400 hover:text-primary">
+                                <iclass="fa fa-search"></i>
+                            </button>
                         </form>
                     </div>
                     {{-- brand --}}

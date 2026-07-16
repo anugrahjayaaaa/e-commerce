@@ -37,10 +37,19 @@ class ShopController extends Controller
             $query->whereIn('category_id', $categoryIds);
         }
 
-        if($request->filled('min_price') && $request->input('max_price')){
+        if ($request->filled('min_price') && $request->input('max_price')) {
             $minPrice = $request->input('min_price');
             $maxPrice = $request->input('max_price');
             $query->whereBetween('sale_price', [$minPrice, $maxPrice]);
+        }
+
+        // Apply Search Filter
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('description', 'LIKE', "%{$search}%");
+            });
         }
 
         $products = $query->paginate($perPage)->withQueryString();
