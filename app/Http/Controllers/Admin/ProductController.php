@@ -136,6 +136,23 @@ class ProductController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show(string $slug)
+    {
+        $product = Product::where('slug', $slug)->firstOrFail();
+
+        $relatedProducts = Product::where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->where('status', true)
+            ->orderBy('created_at', 'DESC')
+            ->take(8)
+            ->get();
+
+        return view('products.show', compact('product', 'relatedProducts'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)

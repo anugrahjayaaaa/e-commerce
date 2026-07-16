@@ -20,6 +20,9 @@ Route::get('/', [HomeController::class, 'index'])->name('home.index');
 // shop
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
+//products
+Route::get('/shop/products/{product:slug}', [ProductController::class, 'show'])->name('shop.products.show');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

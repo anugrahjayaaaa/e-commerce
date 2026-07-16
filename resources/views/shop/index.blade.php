@@ -188,7 +188,7 @@
                         <div class="group">
                             <div class="relative overflow-hidden bg-gray-100 rounded-lg mb-4">
                                 {{-- img --}}
-                                <a href="details.php">
+                                <a href="{{ route('shop.products.show', $product->slug) }}">
                                     <img src="{{ asset('uploads/products/thumbnails/' . $product->image) }}"
                                         alt="{{ $product->name }}"
                                         class="w-full h-[300px] object-cover transition duration-500 group-hover:scale-105" />
@@ -215,12 +215,12 @@
                             <div class="text-center">
                                 {{-- name --}}
                                 <h4 class="text-lg font-medium hover:text-primary">
-                                    <a href="details.php">{{ $product->name }}</a>
+                                    <a
+                                        href="{{ route('shop.products.show', $product->slug) }}">{{ $product->name }}</a>
                                 </h4>
                                 {{-- price container --}}
                                 <div class="mt-1">
                                     <div class="flex items-center justify-center space-x-4">
-                                        {{-- Tampilkan Regular Price selalu (dicoret jika ada sale) --}}
                                         @if ($product->sale_price && $product->sale_price < $product->regular_price)
                                             <span class="text-xl text-gray-400 line-through">
                                                 ${{ number_format($product->regular_price, 2) }}
@@ -237,7 +237,7 @@
                                 </div>
                             </div>
                         </div>
-                    @endforeach 
+                    @endforeach
                 </div>
 
                 <div id="product-list-view" class="flex flex-col space-y-8 hidden">
