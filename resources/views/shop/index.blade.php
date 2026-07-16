@@ -29,44 +29,41 @@
                     </div>
 
                     <div class="bg-gray-50 p-6 rounded-lg border">
+                        <h4 class="font-bold text-lg mb-4">Brands</h4>
+                        <ul class="space-y-3">
+                            @foreach ($brands as $brand)
+                                <li class="flex items-center">
+                                    <label class="flex items-center cursor-pointer hover:text-primary">
+                                        <input name="brand[]" type="checkbox" value="{{ $brand->id }}"
+                                            {{ in_array($brand->id, request('brand', [])) ? 'checked' : '' }}
+                                            class="peer custom-checkbox hidden filter-checkbox">
+                                        <div
+                                            class="w-4 h-4 border border-gray-300 rounded mr-3 flex items-center justify-center bg-white transition peer-checked:bg-primary peer-checked:border-primary text-transparent peer-checked:text-white ">
+                                            <i class="fa fa-check text-[10px]"></i>
+                                        </div>
+                                        {{ $brand->name }} ({{ $brand->products_count }})
+                                    </label>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                    <div class="bg-gray-50 p-6 rounded-lg border">
                         <h4 class="font-bold text-lg mb-4">Categories</h4>
                         <ul class="space-y-3">
-                            <li class="flex items-center">
-                                <label class="flex items-center cursor-pointer hover:text-primary">
-                                    <input type="checkbox" class="custom-checkbox hidden">
-                                    <div
-                                        class="w-4 h-4 border border-gray-300 rounded mr-3 flex items-center justify-center bg-white transition">
-                                    </div>
-                                    Office Chair
-                                </label>
-                            </li>
-                            <li class="flex items-center">
-                                <label class="flex items-center cursor-pointer hover:text-primary">
-                                    <input type="checkbox" class="custom-checkbox hidden">
-                                    <div
-                                        class="w-4 h-4 border border-gray-300 rounded mr-3 flex items-center justify-center bg-white transition">
-                                    </div>
-                                    Dining Chair
-                                </label>
-                            </li>
-                            <li class="flex items-center">
-                                <label class="flex items-center cursor-pointer hover:text-primary">
-                                    <input type="checkbox" class="custom-checkbox hidden">
-                                    <div
-                                        class="w-4 h-4 border border-gray-300 rounded mr-3 flex items-center justify-center bg-white transition">
-                                    </div>
-                                    Sofa Set
-                                </label>
-                            </li>
-                            <li class="flex items-center">
-                                <label class="flex items-center cursor-pointer hover:text-primary">
-                                    <input type="checkbox" class="custom-checkbox hidden">
-                                    <div
-                                        class="w-4 h-4 border border-gray-300 rounded mr-3 flex items-center justify-center bg-white transition">
-                                    </div>
-                                    Lighting
-                                </label>
-                            </li>
+                            @foreach ($categories as $category)
+                                <li class="flex items-center">
+                                    <label class="flex items-center cursor-pointer hover:text-primary">
+                                        <input name="category" type="checkbox" class="custom-checkbox hidden"
+                                            value="{{ $category->id }}"
+                                            {{ request('category') == $category->id ? 'checked' : '' }}>
+                                        <div
+                                            class="w-4 h-4 border border-gray-300 rounded mr-3 flex items-center justify-center bg-white transition">
+                                        </div>
+                                        {{ $category->name }}
+                                    </label>
+                                </li>
+                            @endforeach
                         </ul>
                     </div>
 
@@ -158,7 +155,7 @@
                             <span class="font-bold text-primary">
                                 {{ $products->firstItem() ?? 0 }} - {{ $products->lastItem() ?? 0 }}
                             </span>
-                            of 
+                            of
                             <span class="font-bold">{{ $products->total() }}</span>
                             Results
                         </p>
@@ -379,5 +376,5 @@
     <!-- Main Content End -->
 
     {{-- form filter --}}
-    @include('partials.scripts.form-filter ')
+    @include('partials.scripts.shop-filters ')
 </x-app-layout>

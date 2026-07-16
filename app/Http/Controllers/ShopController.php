@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -25,10 +27,17 @@ class ShopController extends Controller
 
         $perPage = $request->input('per_page', 12);
 
+        if ($request->filled('brand')) {
+            $brandIds = $request->input('brand', '[]');
+            $query->whereIn('brand_id', $brandIds);
+        }
 
         $products = $query->paginate($perPage)->withQueryString();
 
-        return view('shop.index', compact('products'));
+        $brands = Brand::withCount('products')->orderBy('name', 'asc')->get();
+        $categories = Category::withCount('products')->orderBy('name', 'asc')->get();
+
+        return view('shop.index', compact('products', 'brands', 'categories'));
     }
 
     /**
