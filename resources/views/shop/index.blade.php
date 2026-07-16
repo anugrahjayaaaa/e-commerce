@@ -1,4 +1,6 @@
 <x-app-layout>
+    {{-- style custom range slider --}}
+    @include('partials.styles.custom-range-slider')
     <!-- Main Content Start -->
 
     <div class="relative bg-sky-700 text-white h-64 flex items-center justify-center bg-cover bg-center"
@@ -18,7 +20,6 @@
         <form id="form-filter" method="GET" action="{{ route('shop.index') }}">
             <div class="flex flex-col lg:flex-row gap-8">
                 <aside class="w-full lg:w-1/4 order-2 lg:order-1 space-y-8">
-
                     <div class="bg-gray-50 p-6 rounded-lg border">
                         <form class="relative">
                             <input type="text" placeholder="Search product..."
@@ -27,7 +28,7 @@
                                     class="fa fa-search"></i></button>
                         </form>
                     </div>
-
+                    {{-- brand --}}
                     <div class="bg-gray-50 p-6 rounded-lg border">
                         <h4 class="font-bold text-lg mb-4">Brands</h4>
                         <ul class="space-y-3">
@@ -47,7 +48,7 @@
                             @endforeach
                         </ul>
                     </div>
-
+                    {{-- category --}}
                     <div class="bg-gray-50 p-6 rounded-lg border">
                         <h4 class="font-bold text-lg mb-4">Categories</h4>
                         <ul class="space-y-3">
@@ -67,28 +68,33 @@
                             @endforeach
                         </ul>
                     </div>
-
+                    {{-- price --}}
                     <div class="bg-gray-50 p-6 rounded-lg border">
                         <h4 class="font-bold text-lg mb-4">Filter By Price</h4>
                         <div class="relative pt-6 pb-2">
-                            <div class="relative w-full h-1 bg-gray-300 rounded">
-                                <div class="absolute h-1 bg-primary rounded left-0 right-0" id="range-track"
-                                    style="left: 10%; right: 30%;"></div>
-                            </div>
-                            <input type="range" min="0" max="500" value="50"
-                                class="absolute w-full h-1 bg-transparent appearance-none top-6 left-0 pointer-events-none z-20"
+                            {{-- background track --}}
+                            <div class="absolute w-full h-1 bg-gray-300 rounded top-6 z0"></div>
+                            {{-- active colored track --}}
+                            <div id="range-tracker" class="absolute h-1 bg-primary rounded top-6 z-10"
+                                style="left: 0%; right:0%;"></div>
+                            {{-- min price --}}
+                            <input type="range" name="min_price" min="0" max="1000"
+                                value="{{ request('min_price', 0) }}"
+                                class="absolute w-full h-1 bg-transparent appearance-none top-6 left-0 pointer-events-none z-20 custom-range-slider price-slider"
                                 id="range-min">
-                            <input type="range" min="0" max="500" value="350"
-                                class="absolute w-full h-1 bg-transparent appearance-none top-6 left-0 pointer-events-none z-20"
+                            {{-- max price --}}
+                            <input type="range" name="max_price" min="0" max="1000"
+                                value="{{ request('max_price', 1000) }}"
+                                class="absolute w-full h-1 bg-transparent appearance-none top-6 left-0 pointer-events-none z-20 custom-range-slider price-slider "
                                 id="range-max">
-
+                            {{-- price display --}}
                             <div class="flex justify-between mt-4 text-sm font-medium text-gray-600">
-                                <span>$<span id="price-min-display">50</span></span>
-                                <span>$<span id="price-max-display">350</span></span>
+                                <span>$<span id="price-min-display">{{ request('min_price', 0) }}</span></span>
+                                <span>$<span id="price-max-display">{{ request('max_price', 1000) }}</span></span>
                             </div>
                         </div>
                     </div>
-
+                    {{-- color --}}
                     <div class="bg-gray-50 p-6 rounded-lg border">
                         <h4 class="font-bold text-lg mb-4">Filter By Color</h4>
                         <ul class="space-y-3">
@@ -130,7 +136,7 @@
                             </li>
                         </ul>
                     </div>
-
+                    {{-- tag --}}
                     <div class="bg-gray-50 p-6 rounded-lg border">
                         <h4 class="font-bold text-lg mb-4">Tags</h4>
                         <div class="flex flex-wrap gap-2">
